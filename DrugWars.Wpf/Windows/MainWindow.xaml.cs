@@ -31,7 +31,7 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
     private ScrollViewer? _gameLogScrollViewer;
 
     private EventHandler<GameEventArgs>? _gameEventHandler;
-    private EventHandler<GameEventArgs>? _gameOverHandler;
+    private EventHandler? _gameOverHandler;
     private Func<int, bool>? _trenchcoatUpgradeHandler;
     private Func<string, string[], string>? _playerChoiceHandler;
 
@@ -66,7 +66,7 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
             {
                 // Create and store handlers
                 _gameEventHandler = (s, e) => OnGameEvent(s, e);
-                _gameOverHandler = (s, e) => OnGameOver(s, e);
+                _gameOverHandler = (s, e) => OnGameOver(s, new GameEventArgs("Game over"));
                 _trenchcoatUpgradeHandler = ConfirmTrenchcoatUpgrade;
                 _playerChoiceHandler = ShowPlayerChoiceDialog;
 
@@ -139,7 +139,7 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
         }
     }
 
-    private DispatcherTimer _statusBarTimer;
+    private DispatcherTimer _statusBarTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
 
     public MainWindow(GameEngine gameEngine)
     {
@@ -163,7 +163,6 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
             // Keyboard shortcuts
             InputBindings.Add(new KeyBinding(new RelayCommand(_ => { Debug.WriteLine("ESC pressed, calling Close()"); Close(); }), new KeyGesture(Key.Escape)));
             InputBindings.Add(new KeyBinding(new RelayCommand(_ => ShowHelpDialog()), new KeyGesture(Key.F1)));
-            _statusBarTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
             _statusBarTimer.Tick += (s, e) => { Debug.WriteLine("StatusBarTimer ticked, hiding status bar"); IsStatusBarVisible = false; _statusBarTimer.Stop(); };
         }
         catch (Exception ex)
@@ -214,15 +213,19 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
         // Cleanup event handlers
         if (GameEngine != null)
         {
-            GameEngine.GameEventOccurred -= _gameEventHandler;
-            GameEngine.GameOver -= _gameOverHandler;
-            GameEngine.TrenchcoatUpgradeRequested -= _trenchcoatUpgradeHandler;
-            GameEngine.PlayerChoiceRequested -= _playerChoiceHandler;
+            if (_gameEventHandler != null)
+                GameEngine.GameEventOccurred -= _gameEventHandler;
+            if (_gameOverHandler != null)
+                GameEngine.GameOver -= _gameOverHandler;
+            if (_trenchcoatUpgradeHandler != null)
+                GameEngine.TrenchcoatUpgradeRequested -= _trenchcoatUpgradeHandler;
+            if (_playerChoiceHandler != null)
+                GameEngine.PlayerChoiceRequested -= _playerChoiceHandler;
         }
 
         // Dispose timer
         _statusBarTimer?.Stop();
-        _statusBarTimer = null;
+        _statusBarTimer = null!; // Mark as nulled after disposal
 
         if (_instance == this)
         {
