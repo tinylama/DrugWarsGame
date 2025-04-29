@@ -1,0 +1,81 @@
+<local:GameWindowBase x:Class="DrugWars.Wpf.Windows.SplashWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DrugWars.Wpf.Windows"
+        mc:Ignorable="d"
+        Title="Drug Wars" WindowState="Maximized" WindowStyle="None" ResizeMode="NoResize"
+        Icon="pack://application:,,,/Resources/images/DrugWars.ico"
+        Background="Black">
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="Lime"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="Black"/>
+            <Setter Property="Foreground" Value="Lime"/>
+            <Setter Property="BorderBrush" Value="Lime"/>
+            <Setter Property="FontFamily" Value="Consolas"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+    </Window.Resources>
+    <Grid Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+            <StackPanel Margin="0,60,0,30" HorizontalAlignment="Center">
+                <TextBlock Text="DRUG WARS" FontSize="40" FontWeight="Bold" TextAlignment="Center"/>
+                <TextBlock Text="Choose Your Location" FontSize="20" Margin="0,10,0,0" TextAlignment="Center"/>
+            </StackPanel>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Button x:Name="OriginalButton" Click="OnOriginalClick" Grid.Row="0" Grid.Column="0" Margin="10" Width="250" Height="100" BorderBrush="Lime" BorderThickness="2">
+                    <StackPanel>
+                        <TextBlock Text="NEW YORK CITY" FontSize="24" FontWeight="Bold"/>
+                        <TextBlock Text="The Original Experience" FontSize="16" Margin="0,5"/>
+                        <TextBlock Text="Deal in the concrete jungle" FontSize="14" Opacity="0.6"/>
+                    </StackPanel>
+                </Button>
+                <Button x:Name="AustraliaButton" Click="OnAustraliaClick" Grid.Row="0" Grid.Column="1" Margin="10" Width="250" Height="100" BorderBrush="Lime" BorderThickness="2">
+                    <StackPanel>
+                        <TextBlock Text="AUSTRALIA" FontSize="24" FontWeight="Bold"/>
+                        <TextBlock Text="The Down Under Edition" FontSize="16" Margin="0,5"/>
+                        <TextBlock Text="G'day mate, fancy some gear?" FontSize="14" Opacity="0.6"/>
+                    </StackPanel>
+                </Button>
+                <Button x:Name="UKButton" Click="OnUKClick" Grid.Row="1" Grid.Column="0" Margin="10" Width="250" Height="100" BorderBrush="Lime" BorderThickness="2">
+                    <StackPanel>
+                        <TextBlock Text="UNITED KINGDOM" FontSize="24" FontWeight="Bold"/>
+                        <TextBlock Text="The British Edition" FontSize="16" Margin="0,5"/>
+                        <TextBlock Text="Fancy a bit of Charlie, mate?" FontSize="14" Opacity="0.6"/>
+                    </StackPanel>
+                </Button>
+                <Button x:Name="MedellinButton" Click="OnMedellinClick" Grid.Row="1" Grid.Column="1" Margin="10" Width="250" Height="100" BorderBrush="Lime" BorderThickness="2">
+                    <StackPanel>
+                        <TextBlock Text="MEDELLÍN" FontSize="24" FontWeight="Bold"/>
+                        <TextBlock Text="The El Dorado Edition" FontSize="16" Margin="0,5"/>
+                        <TextBlock Text="¡Parcero, welcome to the city of eternal spring!" FontSize="14" Opacity="0.6"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+            <Button x:Name="ExitButton" Click="OnExitClick" Margin="30,30,30,0" Width="250" Height="50" BorderBrush="Lime" BorderThickness="2">
+                    <TextBlock Text="EXIT" FontSize="24"/>
+                </Button>
+            </StackPanel>
+        </Grid>
+    <Window.InputBindings>
+        <KeyBinding Key="Escape" Command="{x:Static ApplicationCommands.Close}"/>
+    </Window.InputBindings>
+</local:GameWindowBase> 

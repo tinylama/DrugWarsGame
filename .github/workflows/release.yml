@@ -1,0 +1,41 @@
+name: Release Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
+        
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+    
+    - name: Test
+      run: dotnet test --no-restore --verbosity normal
+      
+    - name: Publish
+      run: dotnet publish DrugWars.Wpf/DrugWars.Wpf.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true --output publish
+      
+    - name: Create ZIP archive
+      run: Compress-Archive -Path publish/* -DestinationPath DrugWars-${{ github.ref_name }}.zip
+      
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: DrugWars-${{ github.ref_name }}.zip
+        draft: false
+        prerelease: false
+        generate_release_notes: true 
