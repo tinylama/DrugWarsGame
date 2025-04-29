@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:DrugWars.Wpf.Windows"
         mc:Ignorable="d"
         Title="Drug Wars" WindowState="Maximized" WindowStyle="None" ResizeMode="NoResize"
+        Icon="pack://application:,,,/Resources/images/DrugWars.ico"
         Background="Black">
     <Window.Resources>
         <Style TargetType="TextBlock">

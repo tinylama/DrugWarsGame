@@ -1,51 +1,37 @@
 using System;
-using System.IO;
+using System.Diagnostics;
+using System.Windows;
+using DrugWars.Wpf.Windows;
 
 namespace DrugWars.Wpf.Services
 {
     public static class Logger
     {
-        private static string _logFilePath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
-            "DrugWars_Log.txt");
-
         public static void Initialize()
         {
-            // Create or clear the log file
-            File.WriteAllText(_logFilePath, $"DrugWars Log - {DateTime.Now}\n");
+            Debug.WriteLine($"DrugWars Log - {DateTime.Now}");
         }
 
         public static void Log(string message)
         {
-            try
-            {
-                string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                string logMessage = $"[{timestamp}] {message}\n";
-                File.AppendAllText(_logFilePath, logMessage);
-            }
-            catch (Exception ex)
-            {
-                // If we can't log, there's not much we can do
-                System.Diagnostics.Debug.WriteLine($"Failed to log message: {ex.Message}");
-            }
+            string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            Debug.WriteLine($"[{timestamp}] {message}");
         }
 
         public static void LogError(string message, Exception ex)
         {
-            try
+            string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            Debug.WriteLine($"[{timestamp}] ERROR: {message}");
+            Debug.WriteLine($"Exception: {ex.GetType().Name}");
+            Debug.WriteLine($"Message: {ex.Message}");
+            Debug.WriteLine($"Stack Trace:\n{ex.StackTrace}");
+
+            // Show error window on UI thread
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                string logMessage = $"[{timestamp}] ERROR: {message}\n";
-                logMessage += $"Exception: {ex.GetType().Name}\n";
-                logMessage += $"Message: {ex.Message}\n";
-                logMessage += $"Stack Trace:\n{ex.StackTrace}\n";
-                File.AppendAllText(_logFilePath, logMessage);
-            }
-            catch (Exception logEx)
-            {
-                // If we can't log, there's not much we can do
-                System.Diagnostics.Debug.WriteLine($"Failed to log error: {logEx.Message}");
-            }
+                var errorWindow = new ErrorWindow($"{message}\n\nError: {ex.Message}");
+                errorWindow.ShowDialog();
+            });
         }
     }
 } 

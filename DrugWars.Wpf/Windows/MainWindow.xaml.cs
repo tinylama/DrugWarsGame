@@ -46,49 +46,38 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
         set
         {
             Debug.WriteLine($"GameEngine property set: {value}");
-            
-            // Unsubscribe from old engine events
+            // Remove old event handlers if needed
             if (base.GameEngine != null)
             {
-                if (_gameEventHandler != null)
-                    base.GameEngine.GameEventOccurred -= _gameEventHandler;
-                if (_gameOverHandler != null)
-                    base.GameEngine.GameOver -= _gameOverHandler;
-                if (_trenchcoatUpgradeHandler != null)
-                    base.GameEngine.TrenchcoatUpgradeRequested -= _trenchcoatUpgradeHandler;
-                if (_playerChoiceHandler != null)
-                    base.GameEngine.PlayerChoiceRequested -= _playerChoiceHandler;
+                // Clean up old event handlers
+                base.GameEngine.GameEventOccurred -= _gameEventHandler;
+                Debug.WriteLine("GameEngine.GameEventOccurred handler removed");
+                base.GameEngine.GameOver -= _gameOverHandler;
+                Debug.WriteLine("GameEngine.GameOver handler removed");
+                base.GameEngine.TrenchcoatUpgradeRequested -= _trenchcoatUpgradeHandler;
+                Debug.WriteLine("GameEngine.TrenchcoatUpgradeRequested handler removed");
+                base.GameEngine.PlayerChoiceRequested -= _playerChoiceHandler;
+                Debug.WriteLine("GameEngine.PlayerChoiceRequested handler removed");
             }
 
             base.GameEngine = value;
             
-            if (value != null)
-            {
-                // Create and store handlers
-                _gameEventHandler = (s, e) => OnGameEvent(s, e);
-                _gameOverHandler = (s, e) => OnGameOver(s, new GameEventArgs("Game over"));
-                _trenchcoatUpgradeHandler = ConfirmTrenchcoatUpgrade;
-                _playerChoiceHandler = ShowPlayerChoiceDialog;
-
-                // Subscribe to new engine events
-                value.GameEventOccurred += _gameEventHandler;
-                value.GameOver += _gameOverHandler;
-                value.TrenchcoatUpgradeRequested += _trenchcoatUpgradeHandler;
-                value.PlayerChoiceRequested += _playerChoiceHandler;
-            }
-
+            // Set the static Current property for converters to access
+            GameEngine.Current = value;
+            
+            // Listen to events on the new GameEngine
+            WireGameEngineEvents();
+            
+            // Update UI
+            Update();
+            
             OnPropertyChanged(nameof(GameEngine));
             OnPropertyChanged(nameof(Player));
             OnPropertyChanged(nameof(Drugs));
-            OnPropertyChanged(nameof(PlayerInventory));
             OnPropertyChanged(nameof(IsBankAvailable));
             OnPropertyChanged(nameof(IsLoanSharkAvailable));
-            UpdateInventoryList();
-            OnPropertyChanged(nameof(TrenchcoatCapacity));
-            Debug.WriteLine($"GameEngine set complete. Player: {Player}");
             
-            // Update initial state
-            UpdatePlayerStats();
+            Debug.WriteLine($"GameEngine set complete. Player: {Player}");
         }
     }
 
@@ -141,15 +130,13 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
 
     private DispatcherTimer _statusBarTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
 
-    public MainWindow(GameEngine gameEngine)
+    public MainWindow(GameEngine gameEngine) : base(gameEngine)
     {
         try
         {
             Debug.WriteLine("MainWindow constructor started");
             Debug.WriteLine($"=== Initializing MainWindow ===");
             Debug.WriteLine($"Time: {DateTime.Now}");
-            GameEngine = gameEngine;
-            Debug.WriteLine($"GameEngine set in ctor: {GameEngine}");
             InitializeComponent();
             Debug.WriteLine("InitializeComponent completed");
             DataContext = this;
@@ -266,6 +253,10 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
             OnPropertyChanged(nameof(IsBankAvailable));
             OnPropertyChanged(nameof(IsLoanSharkAvailable));
             OnPropertyChanged(nameof(TrenchcoatCapacity));
+            
+            // Extra safety check for game over conditions
+            GameEngine.CheckGameOverConditions();
+            
             Logger.Log("Player stats updated successfully");
         }
         catch (Exception ex)
@@ -310,9 +301,9 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
                 {
                     try
                     {
-                        var mainMenu = new MainWindow(new GameEngine());
-                        mainMenu.Show();
-                    }
+                var mainMenu = new MainWindow(new GameEngine());
+                mainMenu.Show();
+            }
                     catch (Exception ex)
                     {
                         MessageBox.Show($"Failed to start new game: {ex.Message}", "Error", 
@@ -377,10 +368,22 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
                 StatusMessage = "You do not have enough money to buy drugs.";
                 return;
             }
-            var buyWindow = new BuyWindow { GameEngine = GameEngine, Owner = this };
+            
+            try 
+            {
+                var buyWindow = new BuyWindow();
+                buyWindow.GameEngine = this.GameEngine; // Set GameEngine after creation
+                buyWindow.Owner = this;
             buyWindow.ShowDialog();
             UpdatePlayerStats();
             UpdateInventoryList();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error creating BuyWindow: {ex.Message}");
+                Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                StatusMessage = "An error occurred while opening the buy window.";
+            }
         }
         catch (Exception ex)
         {
@@ -402,10 +405,22 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
                 StatusMessage = "You do not have any drugs to sell.";
                 return;
             }
-            var sellWindow = new SellWindow { GameEngine = GameEngine, Owner = this };
+            
+            try 
+            {
+                var sellWindow = new SellWindow();
+                sellWindow.GameEngine = this.GameEngine; // Set GameEngine after creation
+                sellWindow.Owner = this;
             sellWindow.ShowDialog();
             UpdatePlayerStats();
             UpdateInventoryList();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error creating SellWindow: {ex.Message}");
+                Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                StatusMessage = "An error occurred while opening the sell window.";
+            }
         }
         catch (Exception ex)
         {
@@ -432,6 +447,9 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
                 OnPropertyChanged(nameof(Drugs));
                 OnPropertyChanged(nameof(IsBankAvailable));
                 OnPropertyChanged(nameof(IsLoanSharkAvailable));
+                
+                // Extra check for day limit after travel
+                GameEngine.CheckGameOverConditions();
             }
         }
         catch (Exception ex)
@@ -620,6 +638,19 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
         }
     }
 
+    private void OnTitleBarMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        try
+        {
+            DragMove();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Error in OnTitleBarMouseLeftButtonDown: {ex.Message}");
+            Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+        }
+    }
+
     private void OnWindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
     {
         Debug.WriteLine("OnWindowClosing called");
@@ -651,14 +682,14 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
         try
         {
             Debug.WriteLine($"Player choice requested: {message}");
-            // Only handle police/gun events, not travel cancel
-            var dialog = new PlayerChoiceDialog(message, options);
-            bool? result = dialog.ShowDialog();
+        // Only handle police/gun events, not travel cancel
+        var dialog = new PlayerChoiceDialog(message, options);
+        bool? result = dialog.ShowDialog();
             
             if (result == true && !string.IsNullOrEmpty(dialog.SelectedOption))
             {
                 Debug.WriteLine($"Player chose: {dialog.SelectedOption}");
-                return dialog.SelectedOption;
+            return dialog.SelectedOption;
             }
             
             // If cancelled or no selection, return empty string (safer than null)
@@ -672,5 +703,28 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
             // Return empty string on error
             return string.Empty;
         }
+    }
+
+    private void WireGameEngineEvents()
+    {
+        if (GameEngine != null)
+        {
+            _gameEventHandler = (s, e) => OnGameEvent(s, e);
+            _gameOverHandler = (s, e) => OnGameOver(s, new GameEventArgs("Game over"));
+            _trenchcoatUpgradeHandler = ConfirmTrenchcoatUpgrade;
+            _playerChoiceHandler = ShowPlayerChoiceDialog;
+
+            GameEngine.GameEventOccurred += _gameEventHandler;
+            GameEngine.GameOver += _gameOverHandler;
+            GameEngine.TrenchcoatUpgradeRequested += _trenchcoatUpgradeHandler;
+            GameEngine.PlayerChoiceRequested += _playerChoiceHandler;
+        }
+    }
+
+    private void Update()
+    {
+        UpdatePlayerStats();
+        UpdateInventoryList();
+        UpdateDisplay();
     }
 }

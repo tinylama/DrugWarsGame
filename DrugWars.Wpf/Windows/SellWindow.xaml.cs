@@ -105,7 +105,50 @@ namespace DrugWars.Wpf.Windows
                 Debug.WriteLine($"Time: {DateTime.Now}");
                 InitializeComponent();
                 DataContext = this;
-                LoadInventory();
+                IconHelper.SetWindowIcon(this);
+                
+                // Defer loading inventory until the GameEngine property is set
+                Loaded += (s, e) => 
+                {
+                    try 
+                    {
+                        LoadInventory();
+                        
+                        // Auto-select first item if available
+                        var drugListBox = this.FindName("DrugListBox") as ListBox;
+                        if (drugListBox != null && drugListBox.Items.Count > 0 && SelectedDrug == null)
+                        {
+                            drugListBox.SelectedIndex = 0;
+                            // Set quantity to all available for the selected drug
+                            if (SelectedDrug != null && GameEngine.Player.Inventory.TryGetValue(SelectedDrug, out int owned))
+                            {
+                                Quantity = owned;
+                            }
+                        }
+                        
+                        // If no inventory, show message and close
+                        if (GameEngine.Player.Inventory.Count == 0)
+                        {
+                            if (Owner is MainWindow mainWindow)
+                            {
+                                mainWindow.SetStatusMessage("You do not have any drugs to sell.");
+                            }
+                            Close();
+                            return;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Error in Loaded event: {ex.Message}");
+                        Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                        if (Owner is MainWindow mainWindow)
+                        {
+                            mainWindow.SetStatusMessage("Error opening sell window: " + ex.Message);
+                        }
+                        Close();
+                    }
+                };
+                
                 // Keyboard shortcuts
                 InputBindings.Add(new KeyBinding(new RelayCommand(_ => Close()), new KeyGesture(Key.Escape)));
                 InputBindings.Add(new KeyBinding(new RelayCommand(_ => ShowHelpDialog()), new KeyGesture(Key.F1)));
@@ -150,26 +193,6 @@ namespace DrugWars.Wpf.Windows
             }
         }
 
-        private void OnInventoryItemClicked(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                var button = (Button)sender;
-                var item = (InventoryItem)button.DataContext;
-                SelectedDrug = item.DrugName;
-                Quantity = item.Quantity;
-                Debug.WriteLine($"Inventory item clicked: {item.DrugName}");
-                Debug.WriteLine($"Quantity available: {item.Quantity}");
-                Debug.WriteLine($"Value per unit: ${item.ValuePerUnit:N0}");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error in OnInventoryItemClicked: {ex.Message}");
-                Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
-                ErrorMessage = "Error selecting drug";
-            }
-        }
-
         private void OnQuantityChanged(object sender, TextChangedEventArgs e)
         {
             if (sender is TextBox textBox && int.TryParse(textBox.Text, out int quantity))
@@ -180,22 +203,6 @@ namespace DrugWars.Wpf.Windows
             else
             {
                 ErrorMessage = "Please enter a valid quantity";
-            }
-        }
-
-        private void NumberValidationTextBox(object sender, TextCompositionEventArgs e)
-        {
-            try
-            {
-                Debug.WriteLine($"Validating input: {e.Text}");
-                e.Handled = !int.TryParse(e.Text, out _);
-                Debug.WriteLine($"Input validation result: {!e.Handled}");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error in NumberValidationTextBox: {ex.Message}");
-                Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
-                e.Handled = true;
             }
         }
 
@@ -234,6 +241,19 @@ namespace DrugWars.Wpf.Windows
             Close();
         }
 
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                DragMove();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error in Window_MouseLeftButtonDown: {ex.Message}");
+                Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+            }
+        }
+
         protected virtual void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -243,7 +263,7 @@ namespace DrugWars.Wpf.Windows
         {
             try
             {
-                if (sender is ComboBox comboBox && comboBox.SelectedItem is string drugName)
+                if (sender is ListBox listBox && listBox.SelectedItem is string drugName)
                 {
                     SelectedDrug = drugName;
                     ErrorMessage = string.Empty;

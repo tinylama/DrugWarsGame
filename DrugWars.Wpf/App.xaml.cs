@@ -166,6 +166,7 @@ public partial class App : Application
             Logger.Log("Opening SplashWindow to select expansion");
             Debug.WriteLine("Startup: Creating SplashWindow");
             var splashWindow = new SplashWindow();
+            IconHelper.SetWindowIcon(splashWindow);
             Debug.WriteLine("Startup: SplashWindow created");
             splashWindow.ExpansionSelected += (sender, selectedExpansion) =>
             {
@@ -173,6 +174,7 @@ public partial class App : Application
                 splashWindow.Hide();
                 Debug.WriteLine("Startup: Showing LoanSharkIntroWindow");
                 var loanSharkIntro = new Windows.LoanSharkIntroWindow(selectedExpansion);
+                IconHelper.SetWindowIcon(loanSharkIntro);
                 loanSharkIntro.ShowDialog();
                 Debug.WriteLine("Startup: LoanSharkIntroWindow closed");
                 Logger.Log($"Selected expansion: {selectedExpansion}");
@@ -196,6 +198,18 @@ public partial class App : Application
                         {
                             Logger.Log($"Game event: {gameArgs.Message}");
                             Debug.WriteLine($"Game event: {gameArgs.Message}");
+                            
+                            // Additional check for day 30
+                            if (gameEngine.Player.Day >= 30)
+                            {
+                                Logger.Log("Day 30 reached - enforcing game over");
+                                // Show game over message
+                                Application.Current.Dispatcher.Invoke(() => {
+                                    MessageBox.Show("You've reached day 30. Time to retire!", "Game Over", MessageBoxButton.OK, MessageBoxImage.Information);
+                                    // Handle automatic shutdown and cleanup
+                                    Shutdown();
+                                });
+                            }
                         }
                     };
                     gameEngine.GameOver += (s, args) => 
@@ -211,6 +225,7 @@ public partial class App : Application
                     Logger.Log("Creating MainWindow");
                     Debug.WriteLine("Startup: Creating MainWindow");
                     var mainWindow = new Windows.MainWindow(gameEngine);
+                    IconHelper.SetWindowIcon(mainWindow);
                     Debug.WriteLine("Startup: MainWindow created");
                     Logger.Log("Showing MainWindow");
                     Debug.WriteLine("Startup: Setting MainWindow property");
@@ -254,24 +269,7 @@ public partial class App : Application
 
     private void SetApplicationIcon()
     {
-        try
-        {
-            // Get the icon from resources
-            if (Resources["DrugWarsIcon"] is DrawingImage drawingImage)
-            {
-                // Set the application icon
-                MainWindow.Icon = IconUtility.XamlToBitmapImage(drawingImage);
-                
-                // Save the icon to a file for future use
-                string iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DrugWarsIcon.png");
-                IconUtility.SaveAsIcon(drawingImage, iconPath);
-            }
-        }
-        catch (Exception ex)
-        {
-            // Just log the error, don't crash the application for icon issues
-            System.Diagnostics.Debug.WriteLine($"Error setting application icon: {ex}");
-        }
+        // This method is no longer needed
     }
 
     protected override void OnExit(ExitEventArgs e)

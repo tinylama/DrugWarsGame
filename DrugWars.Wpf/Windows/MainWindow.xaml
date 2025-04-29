@@ -7,6 +7,7 @@
         xmlns:utils="clr-namespace:DrugWars.Wpf.Utilities"
         mc:Ignorable="d"
         Title="Drug Wars" Height="450" Width="800"
+        Icon="pack://application:,,,/Resources/images/DrugWars.ico"
         Background="{DynamicResource WindowBackground}"
         KeyDown="OnKeyDown"
         WindowState="Maximized"
@@ -48,13 +49,16 @@
             <Setter Property="MinHeight" Value="90"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#1A3300"/>
+                    <Setter Property="Background" Value="#1f3f1f"/>
                 </Trigger>
                 <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Background" Value="#264d00"/>
+                    <Setter Property="Background" Value="#2a552a"/>
                 </Trigger>
                 <Trigger Property="IsEnabled" Value="False">
                     <Setter Property="Opacity" Value="0.5"/>
+                    <Setter Property="Background" Value="#0a150a"/>
+                    <Setter Property="Foreground" Value="#3d7a3d"/>
+                    <Setter Property="BorderBrush" Value="#3d7a3d"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -72,187 +76,187 @@
         <Storyboard x:Key="PriceFlashRed">
             <ColorAnimation Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)" To="#FF3333" Duration="0:0:0.2" AutoReverse="True"/>
         </Storyboard>
-        <local:DrugTooltipConverter x:Key="DrugTooltipConverter" />
         <utils:StringNotEmptyToVisibilityConverter x:Key="StringNotEmptyToVisibilityConverter" />
     </Window.Resources>
     
-    <Grid>
-        <!-- Title bar -->
-        <Grid VerticalAlignment="Top" Height="30" Background="#0C1F0C">
-            <TextBlock Text="DRUG WARS" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" Margin="10,0,0,0"/>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="_" Width="30" Height="30" Padding="0" Margin="0" BorderThickness="0" Click="OnMinimizeClick"/>
-                <Button Content="⛶" Width="30" Height="30" Padding="0" Margin="0" BorderThickness="0" Click="OnMaximizeClick"/>
-                <Button Content="X" Width="30" Height="30" Padding="0" Margin="0" BorderThickness="0" Click="OnCloseClick" Background="#3c0000">
-                    <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#7F0000"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
-            </StackPanel>
-        </Grid>
-        
-        <Grid Margin="10,36,10,46">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-
-            <!-- Status Bar -->
-            <Grid Grid.Row="0" Margin="10">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                
-                <StackPanel Grid.Column="0" Orientation="Horizontal">
-                    <TextBlock Text="Cash: $"/>
-                    <TextBlock Text="{Binding GameEngine.Player.Cash, StringFormat=N0}"/>
-                    <TextBlock Text=" | Bank: $" Margin="10,0,0,0"/>
-                    <TextBlock Text="{Binding GameEngine.Player.Bank, StringFormat=N0}"/>
-                    <TextBlock Text=" | Debt: $" Margin="10,0,0,0"/>
-                    <TextBlock Text="{Binding GameEngine.Player.Debt, StringFormat=N0}"/>
-                    <TextBlock Text=" | Health: " Margin="10,0,0,0"/>
-                    <TextBlock Text="{Binding GameEngine.Player.Health}"/>
-                    <TextBlock Text="% | Day: " Margin="10,0,0,0"/>
-                    <TextBlock Text="{Binding GameEngine.Player.Day}"/>
-                    <TextBlock Text="/30"/>
+    <Border BorderBrush="Lime" BorderThickness="1">
+        <Grid>
+            <!-- Title bar - now draggable -->
+            <Grid VerticalAlignment="Top" Height="30" Background="#0C1F0C" MouseLeftButtonDown="OnTitleBarMouseLeftButtonDown">
+                <TextBlock Text="DRUG WARS" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="_" Width="30" Height="30" Padding="0" Margin="0" BorderThickness="0" Click="OnMinimizeClick"/>
+                    <Button Content="⛶" Width="30" Height="30" Padding="0" Margin="0" BorderThickness="0" Click="OnMaximizeClick"/>
+                    <Button Content="X" Width="30" Height="30" Padding="0" Margin="0" BorderThickness="0" Click="OnCloseClick" Background="#3c0000">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#7F0000"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
                 </StackPanel>
-                
-                <TextBlock Grid.Column="1" 
-                           Text="{Binding CurrentLocationName}"
-                           FontWeight="Bold"/>
             </Grid>
+            
+            <Grid Margin="10,36,10,46">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-            <!-- Main Game Area -->
-            <Grid Grid.Row="1" Margin="0,20">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2.5*"/>
-                    <ColumnDefinition Width="2*"/>
-                </Grid.ColumnDefinitions>
-
-                <!-- Market Prices -->
-                <Border Grid.Column="0" BorderBrush="Lime" BorderThickness="1" Padding="20" Background="#0C1F0C" Margin="0,0,30,0">
-                    <StackPanel>
-                        <TextBlock Text="Market Prices:" FontWeight="Bold" FontSize="20" Margin="0,0,0,12"/>
-                        <ItemsControl ItemsSource="{Binding Drugs, Mode=OneWay}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Margin="8,4,8,4" Style="{StaticResource MarketPriceTextStyle}"
-                                               ToolTip="{Binding ., Converter={StaticResource DrugTooltipConverter}}">
-                                        <Run Text="{Binding Name, Mode=OneWay}"/>
-                                        <Run Text=": "/>
-                                        <Run Text="{Binding CurrentPrice, Converter={StaticResource PriceToDisplayConverter}}"/>
-                                        <Run Text="  "/>
-                                        <Run Text="{Binding PriceHistory, Converter={StaticResource PriceHistorySparklineConverter}, Mode=OneWay}"/>
-                                    </TextBlock>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-
-                        <TextBlock Text="Trenchcoat Inventory:" FontWeight="Bold" FontSize="20" Margin="0,24,0,12"/>
-                        <TextBlock Text="{Binding TrenchcoatCapacity}" FontWeight="Bold" FontSize="16" Margin="0,0,0,12"/>
-                        <ItemsControl ItemsSource="{Binding InventoryList, Mode=OneWay}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Margin="8,4" Style="{StaticResource MarketPriceTextStyle}">
-                                        <Run Text="{Binding DrugName}"/>
-                                        <Run Text=": "/>
-                                        <Run Text="{Binding Quantity}"/>
-                                        <Run Text=" @ $"/>
-                                        <Run Text="{Binding ValuePerUnit}"/>
-                                    </TextBlock>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                <!-- Status Bar -->
+                <Grid Grid.Row="0" Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <TextBlock Text="Cash: $"/>
+                        <TextBlock Text="{Binding GameEngine.Player.Cash, StringFormat=N0}"/>
+                        <TextBlock Text=" | Bank: $" Margin="10,0,0,0"/>
+                        <TextBlock Text="{Binding GameEngine.Player.Bank, StringFormat=N0}"/>
+                        <TextBlock Text=" | Debt: $" Margin="10,0,0,0"/>
+                        <TextBlock Text="{Binding GameEngine.Player.Debt, StringFormat=N0}"/>
+                        <TextBlock Text=" | Health: " Margin="10,0,0,0"/>
+                        <TextBlock Text="{Binding GameEngine.Player.Health}"/>
+                        <TextBlock Text="% | Day: " Margin="10,0,0,0"/>
+                        <TextBlock Text="{Binding GameEngine.Player.Day}"/>
+                        <TextBlock Text="/30"/>
                     </StackPanel>
-                </Border>
+                    
+                    <TextBlock Grid.Column="1" 
+                               Text="{Binding CurrentLocationName}"
+                               FontWeight="Bold"/>
+                </Grid>
 
-                <!-- Right column: Tiles and Market News aligned -->
-                <Grid Grid.Column="1" Grid.RowSpan="3" HorizontalAlignment="Stretch">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <!-- Actions in a 2x2 Grid -->
-                    <UniformGrid Grid.Row="0" Rows="3" Columns="2" Margin="0" VerticalAlignment="Top" HorizontalAlignment="Stretch">
-                        <Button Click="OnBuyClick" Style="{StaticResource MenuButtonStyle}" Height="180" Width="320" ToolTip="Buy drugs at current market prices">
-                            <Button.Content>
-                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <TextBlock Text="🛒" FontSize="44" HorizontalAlignment="Center"/>
-                                    <TextBlock Text="Buy" FontSize="28" HorizontalAlignment="Center"/>
-                                </StackPanel>
-                            </Button.Content>
-                        </Button>
-                        <Button Click="OnSellClick" Style="{StaticResource MenuButtonStyle}" Height="180" Width="320" ToolTip="Sell drugs from your inventory">
-                            <Button.Content>
-                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <TextBlock Text="💰" FontSize="44" HorizontalAlignment="Center"/>
-                                    <TextBlock Text="Sell" FontSize="28" HorizontalAlignment="Center"/>
-                                </StackPanel>
-                            </Button.Content>
-                        </Button>
-                        <Button Click="OnTravelClick" Style="{StaticResource MenuButtonStyle}" Height="180" Width="320" ToolTip="Travel to another city to find new prices">
-                            <Button.Content>
-                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <TextBlock Text="✈️" FontSize="44" HorizontalAlignment="Center"/>
-                                    <TextBlock Text="Travel" FontSize="28" HorizontalAlignment="Center"/>
-                                </StackPanel>
-                            </Button.Content>
-                        </Button>
-                        <Button Click="OnBankClick" Style="{StaticResource MenuButtonStyle}" IsEnabled="{Binding GameEngine.IsBankAvailable}" Height="180" Width="320" ToolTip="Visit the bank (only in starting city)">
-                            <Button.Content>
-                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <TextBlock Text="🏦" FontSize="44" HorizontalAlignment="Center"/>
-                                    <TextBlock Text="Bank" FontSize="28" HorizontalAlignment="Center"/>
-                                </StackPanel>
-                            </Button.Content>
-                        </Button>
-                        <Button Click="OnLoanSharkClick" Style="{StaticResource MenuButtonStyle}" IsEnabled="{Binding GameEngine.IsLoanSharkAvailable}" Height="180" Width="320" ToolTip="Visit the loan shark (only in starting city)">
-                            <Button.Content>
-                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <TextBlock Text="🦈" FontSize="44" HorizontalAlignment="Center"/>
-                                    <TextBlock Text="Loan Shark" FontSize="28" HorizontalAlignment="Center"/>
-                                </StackPanel>
-                            </Button.Content>
-                        </Button>
-                        <Button Click="OnSettingsClick" Style="{StaticResource MenuButtonStyle}" Height="180" Width="320" ToolTip="Game settings and options">
-                            <Button.Content>
-                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <TextBlock Text="⚙️" FontSize="44" HorizontalAlignment="Center"/>
-                                    <TextBlock Text="Settings" FontSize="28" HorizontalAlignment="Center"/>
-                                </StackPanel>
-                            </Button.Content>
-                        </Button>
-                    </UniformGrid>
-                    <!-- Market News centered and bottom-aligned -->
-                    <Border Grid.Row="1" BorderBrush="Lime" BorderThickness="1" Margin="0,16,0,0" Background="#0C1F0C" HorizontalAlignment="Stretch" VerticalAlignment="Top"
-                        Visibility="{Binding GameEngine.NewsLog, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
+                <!-- Main Game Area -->
+                <Grid Grid.Row="1" Margin="0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2.5*"/>
+                        <ColumnDefinition Width="2*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Market Prices -->
+                    <Border Grid.Column="0" BorderBrush="Lime" BorderThickness="1" Padding="20" Background="#0C1F0C" Margin="0,0,30,0">
                         <StackPanel>
-                            <TextBlock Text="Market News:" FontWeight="Bold" FontSize="16" Foreground="#39FF14" Margin="10,10,10,4"/>
-                            <TextBlock Text="{Binding GameEngine.NewsLog, Mode=OneWay}" FontFamily="Consolas" FontSize="14" Foreground="#39FF14" TextWrapping="Wrap" Margin="10,0,10,10"/>
+                            <TextBlock Text="Market Prices:" FontWeight="Bold" FontSize="20" Margin="0,0,0,12"/>
+                            <ItemsControl ItemsSource="{Binding Drugs, Mode=OneWay}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Margin="8,4,8,4" Style="{StaticResource MarketPriceTextStyle}">
+                                            <Run Text="{Binding Name, Mode=OneWay}"/>
+                                            <Run Text=": "/>
+                                            <Run Text="{Binding CurrentPrice, Converter={StaticResource PriceToDisplayConverter}, Mode=OneWay}"/>
+                                            <Run Text="  "/>
+                                            <Run Text="{Binding PriceHistory, Converter={StaticResource PriceHistorySparklineConverter}, Mode=OneWay}"/>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <TextBlock Text="Trenchcoat Inventory:" FontWeight="Bold" FontSize="20" Margin="0,24,0,12"/>
+                            <TextBlock Text="{Binding TrenchcoatCapacity}" FontWeight="Bold" FontSize="16" Margin="0,0,0,12"/>
+                            <ItemsControl ItemsSource="{Binding InventoryList, Mode=OneWay}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Margin="8,4" Style="{StaticResource MarketPriceTextStyle}">
+                                            <Run Text="{Binding DrugName}"/>
+                                            <Run Text=": "/>
+                                            <Run Text="{Binding Quantity}"/>
+                                            <Run Text=" @ $"/>
+                                            <Run Text="{Binding ValuePerUnit}"/>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </StackPanel>
                     </Border>
-                </Grid>
-            </Grid>
 
-            <!-- Game Log -->
-            <Border Grid.Row="2" BorderBrush="Lime" BorderThickness="1" Margin="0,10" Background="#0C1F0C">
-                <ScrollViewer x:Name="GameLogScrollViewer" Height="150" VerticalScrollBarVisibility="Auto">
-                    <TextBlock Text="{Binding GameLog, Mode=OneWay}" TextWrapping="Wrap" Margin="10"/>
-                </ScrollViewer>
+                    <!-- Right column: Tiles and Market News aligned -->
+                    <Grid Grid.Column="1" Grid.RowSpan="3" HorizontalAlignment="Stretch">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <!-- Actions in a 2x2 Grid -->
+                        <UniformGrid Grid.Row="0" Rows="3" Columns="2" Margin="0" VerticalAlignment="Top" HorizontalAlignment="Stretch">
+                            <Button Click="OnBuyClick" Style="{StaticResource MenuButtonStyle}" Height="180" Width="320" ToolTip="Buy drugs at current market prices">
+                                <Button.Content>
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock Text="🛒" FontSize="44" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Buy" FontSize="28" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button.Content>
+                            </Button>
+                            <Button Click="OnSellClick" Style="{StaticResource MenuButtonStyle}" Height="180" Width="320" ToolTip="Sell drugs from your inventory">
+                                <Button.Content>
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock Text="💰" FontSize="44" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Sell" FontSize="28" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button.Content>
+                            </Button>
+                            <Button Click="OnTravelClick" Style="{StaticResource MenuButtonStyle}" Height="180" Width="320" ToolTip="Travel to another city to find new prices">
+                                <Button.Content>
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock Text="✈️" FontSize="44" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Travel" FontSize="28" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button.Content>
+                            </Button>
+                            <Button Click="OnBankClick" Style="{StaticResource MenuButtonStyle}" IsEnabled="{Binding GameEngine.IsBankAvailable}" Height="180" Width="320" ToolTip="Visit the bank (only in starting city)">
+                                <Button.Content>
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock Text="🏦" FontSize="44" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Bank" FontSize="28" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button.Content>
+                            </Button>
+                            <Button Click="OnLoanSharkClick" Style="{StaticResource MenuButtonStyle}" IsEnabled="{Binding GameEngine.IsLoanSharkAvailable}" Height="180" Width="320" ToolTip="Visit the loan shark (only in starting city)">
+                                <Button.Content>
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock Text="🦈" FontSize="44" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Loan Shark" FontSize="28" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button.Content>
+                            </Button>
+                            <Button Click="OnSettingsClick" Style="{StaticResource MenuButtonStyle}" Height="180" Width="320" ToolTip="Game settings and options">
+                                <Button.Content>
+                                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock Text="⚙️" FontSize="44" HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Settings" FontSize="28" HorizontalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button.Content>
+                            </Button>
+                        </UniformGrid>
+                        <!-- Market News centered and bottom-aligned -->
+                        <Border Grid.Row="1" BorderBrush="Lime" BorderThickness="1" Margin="0,16,0,0" Background="#0C1F0C" HorizontalAlignment="Stretch" VerticalAlignment="Top"
+                            Visibility="{Binding GameEngine.NewsLog, Converter={StaticResource StringNotEmptyToVisibilityConverter}}">
+                            <StackPanel>
+                                <TextBlock Text="Market News:" FontWeight="Bold" FontSize="16" Foreground="#39FF14" Margin="10,10,10,4"/>
+                                <TextBlock Text="{Binding GameEngine.NewsLog, Mode=OneWay}" FontFamily="Consolas" FontSize="14" Foreground="#39FF14" TextWrapping="Wrap" Margin="10,0,10,10"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Grid>
+
+                <!-- Game Log -->
+                <Border Grid.Row="2" BorderBrush="Lime" BorderThickness="1" Margin="0,10" Background="#0C1F0C">
+                    <ScrollViewer x:Name="GameLogScrollViewer" Height="150" VerticalScrollBarVisibility="Auto">
+                        <TextBlock Text="{Binding GameLog, Mode=OneWay}" TextWrapping="Wrap" Margin="10"/>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+            <!-- Status bar for notifications -->
+            <Border x:Name="StatusBarBorder" VerticalAlignment="Bottom" Height="30" Background="#0C1F0C" BorderBrush="Lime" BorderThickness="1" Margin="10,0,10,10"
+                    Visibility="{Binding IsStatusBarVisible, Converter={StaticResource BoolToVis}}">
+                <TextBlock Text="{Binding StatusMessage}" Foreground="#39FF14" FontFamily="Consolas" FontSize="16" VerticalAlignment="Center" Margin="10,0"/>
             </Border>
         </Grid>
-        <!-- Status bar for notifications -->
-        <Border x:Name="StatusBarBorder" VerticalAlignment="Bottom" Height="30" Background="#0C1F0C" BorderBrush="Lime" BorderThickness="1" Margin="10,0,10,10"
-                Visibility="{Binding IsStatusBarVisible, Converter={StaticResource BoolToVis}}">
-            <TextBlock Text="{Binding StatusMessage}" Foreground="#39FF14" FontFamily="Consolas" FontSize="16" VerticalAlignment="Center" Margin="10,0"/>
-        </Border>
-    </Grid>
+    </Border>
 </local:GameWindowBase>

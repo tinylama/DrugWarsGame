@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Linq;
+using System.Diagnostics;
 
 namespace DrugWars.Core.Models;
 
@@ -13,17 +14,25 @@ public class GameEngine : INotifyPropertyChanged
     private readonly int _startingLocationIndex;
     private static readonly Random _random = new();
     private string _newsLog = string.Empty;
-    private string _lastManipulatedDrug = null;
-    private string _lastManipulationType = null;
+    private string? _lastManipulatedDrug;
+    private string? _lastManipulationType;
     private readonly Dictionary<string, decimal> _averageBuyPrices = new();
 
-    public Player Player { get; init; } = new();
-    public List<Drug> Drugs { get; init; } = new();
-    public List<Location> Locations { get; init; } = new();
+    // Static reference to the current game engine - for use by converters
+    private static GameEngine? _current;
+    public static GameEngine? Current
+    {
+        get => _current;
+        set => _current = value;
+    }
+
+    public Player Player { get; init; }
+    public List<Drug> Drugs { get; init; }
+    public List<Location> Locations { get; init; }
     public GameExpansion Expansion { get; private set; }
     public bool IsBankAvailable => Player.CurrentLocation == _startingLocationIndex;
     public bool IsLoanSharkAvailable => Player.CurrentLocation == _startingLocationIndex;
-    public bool HasGun { get; set; } = false;
+    public bool HasGun { get; set; }
     public string NewsLog
     {
         get => _newsLog;
@@ -40,6 +49,13 @@ public class GameEngine : INotifyPropertyChanged
     {
         _startingLocationIndex = 0;
         Expansion = expansion;
+        Player = new Player();
+        Drugs = new List<Drug>();
+        Locations = new List<Location>();
+        HasGun = false;
+        
+        // Set as the current game engine
+        Current = this;
     }
 
     public decimal GetAverageBuyPrice(string drugName)
@@ -128,6 +144,35 @@ public class GameEngine : INotifyPropertyChanged
         }
     }
 
+    // Additional safety check for day limit
+    public void CheckGameOverConditions()
+    {
+        Debug.WriteLine($"[DEBUG] Checking game over conditions. Current day: {Player.Day}, MAX_DAYS: {MAX_DAYS}");
+        if (Player.Day >= MAX_DAYS)
+        {
+            Debug.WriteLine($"[DEBUG] Day limit reached. Triggering game over.");
+            GameEventOccurred?.Invoke(this, new GameEventArgs($"You've reached day {MAX_DAYS}. Time to retire!"));
+            GameOver?.Invoke(this, EventArgs.Empty);
+            return;
+        }
+        else if (Player.Health <= 0)
+        {
+            Debug.WriteLine($"[DEBUG] Health depleted. Triggering game over.");
+            GameEventOccurred?.Invoke(this, new GameEventArgs("Your health has dropped to 0. Game over!"));
+            GameOver?.Invoke(this, EventArgs.Empty);
+            return;
+        }
+        
+        // Check for excessive debt
+        bool hasExcessiveDebt = Player.Debt > 100000 || (Player.Debt > 50000 && Player.Debt > (Player.Cash + Player.Bank) * 5);
+        if (hasExcessiveDebt)
+        {
+            Debug.WriteLine($"[DEBUG] Excessive debt detected. Triggering game over.");
+            GameEventOccurred?.Invoke(this, new GameEventArgs("Your debt has become unmanageable. The loan sharks are taking over. Game over!"));
+            GameOver?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
     public void AdvanceDayOrTravel()
     {
         Player.Day++;
@@ -203,6 +248,7 @@ public class GameEngine : INotifyPropertyChanged
         {
             NewsLog = string.Empty;
         }
+
         // Player market manipulation
         if (!string.IsNullOrEmpty(_lastManipulatedDrug))
         {
@@ -223,9 +269,17 @@ public class GameEngine : INotifyPropertyChanged
             _lastManipulatedDrug = null;
             _lastManipulationType = null;
         }
+
         RandomizeDrugPricesAndAvailability();
         TriggerRandomEvents();
         TriggerMarketEvent();
+
+        // Record the final prices for all drugs after all changes
+        foreach (var drug in Drugs)
+        {
+            drug.RecordDailyPrice();
+        }
+
         OnPropertyChanged(nameof(Player));
         OnPropertyChanged(nameof(Drugs));
         GameEventOccurred?.Invoke(this, new GameEventArgs($"Day {Player.Day}: Arrived at {Locations[Player.CurrentLocation].Name}"));
@@ -276,7 +330,7 @@ public class GameEngine : INotifyPropertyChanged
         if (allowNegativeEvents && random.NextDouble() < policeChance)
         {
             int policeCount = 1 + Player.Day / 10; // More police as days go on
-            string choice = PlayerChoiceRequested?.Invoke($"Police bust! {policeCount} cop{(policeCount > 1 ? "s" : "")}! Do you want to run or fight?", new[] { "Run", "Fight" });
+            string? choice = PlayerChoiceRequested?.Invoke($"Police bust! {policeCount} cop{(policeCount > 1 ? "s" : "")}! Do you want to run or fight?", new[] { "Run", "Fight" });
             if (string.IsNullOrEmpty(choice)) return; // Cancelled, do nothing
             bool success = false;
             if (choice == "Run")
@@ -511,6 +565,7 @@ public class GameEngine : INotifyPropertyChanged
             return;
         }
 
+        // Check for day limit - MAX_DAYS is inclusive (game ends when Player.Day == MAX_DAYS)
         if (Player.Day >= MAX_DAYS)
         {
             GameEventOccurred?.Invoke(this, new GameEventArgs($"You've reached day {MAX_DAYS}. Time to retire!"));

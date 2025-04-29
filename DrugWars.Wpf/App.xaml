@@ -4,9 +4,6 @@
              xmlns:local="clr-namespace:DrugWars.Wpf">
     <Application.Resources>
         <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Icon.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
             <Style TargetType="ComboBox">
                 <Setter Property="Background" Value="Black"/>
                 <Setter Property="Foreground" Value="Lime"/>
@@ -37,6 +34,7 @@
                     </Setter.Value>
                 </Setter>
             </Style>
+            <SolidColorBrush x:Key="TextForeground" Color="#00FF00"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

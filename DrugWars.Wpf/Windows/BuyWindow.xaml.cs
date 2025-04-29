@@ -27,13 +27,41 @@ namespace DrugWars.Wpf.Windows
         {
             InitializeComponent();
             DataContext = this;
-            // Set ComboBox default selection to first drug after DataContext is set
+            
+            // Set appropriate initial quantity and auto-select drug
             Loaded += (s, e) =>
             {
-                var combo = this.FindName("DrugComboBox") as ComboBox;
-                if (combo != null && combo.Items.Count > 0)
-                    combo.SelectedIndex = 0;
+                try
+                {
+                    // Auto-select first drug from the ListBox
+                    var listBox = this.FindName("DrugListBox") as ListBox;
+                    if (listBox != null && listBox.Items.Count > 0)
+                    {
+                        listBox.SelectedIndex = 0;
+                        
+                        // Set a reasonable default quantity (half of maximum possible)
+                        if (SelectedDrug != null && MaxBuyQuantity > 0)
+                        {
+                            Quantity = Math.Max(1, MaxBuyQuantity / 2);
+                        }
+                        else
+                        {
+                            Quantity = 1;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Error in Loaded event: {ex.Message}");
+                    Debug.WriteLine($"Stack Trace: {ex.StackTrace}");
+                    if (Owner is MainWindow mainWindow)
+                    {
+                        mainWindow.SetStatusMessage("Error opening buy window: " + ex.Message);
+                    }
+                    Close();
+                }
             };
+            
             // Keyboard shortcuts
             InputBindings.Add(new KeyBinding(new RelayCommand(_ => Close()), new KeyGesture(Key.Escape)));
             InputBindings.Add(new KeyBinding(new RelayCommand(_ => ShowHelpDialog()), new KeyGesture(Key.F1)));
@@ -161,7 +189,7 @@ namespace DrugWars.Wpf.Windows
         {
             try
             {
-                if (sender is ComboBox comboBox && comboBox.SelectedItem is Drug drug)
+                if (sender is ListBox listBox && listBox.SelectedItem is Drug drug)
                 {
                     SelectedDrug = drug;
                     ErrorMessage = string.Empty;
@@ -199,6 +227,19 @@ namespace DrugWars.Wpf.Windows
         private void ShowHelpDialog()
         {
             MessageBox.Show("Drug Wars\n\nRetro remake by Mark.\n\nBuy window.\nF1: Help\nEsc: Close window\n", "About / Help", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                DragMove();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error in Window_MouseLeftButtonDown: {ex.Message}");
+                Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+            }
         }
 
         protected virtual void OnPropertyChanged(string propertyName)

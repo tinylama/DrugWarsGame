@@ -1,6 +1,8 @@
 using System;
 using System.Globalization;
 using System.Windows.Data;
+using System.Windows.Media;
+using System.Windows;
 
 namespace DrugWars.Wpf.Windows
 {
@@ -8,15 +10,23 @@ namespace DrugWars.Wpf.Windows
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
+            // Basic currency formatting with $ sign and thousand separators
+            string formattedValue = "";
+            
             if (value is decimal dec)
             {
-                return "$" + dec.ToString("N0");
+                formattedValue = "$" + dec.ToString("N0");
             }
-            if (value is int i)
+            else if (value is int i)
             {
-                return "$" + i.ToString("N0");
+                formattedValue = "$" + i.ToString("N0");
             }
-            return value?.ToString() ?? string.Empty;
+            else
+            {
+                formattedValue = value?.ToString() ?? string.Empty;
+            }
+            
+            return formattedValue;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

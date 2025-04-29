@@ -4,13 +4,18 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DrugWars.Wpf.Windows"
+        xmlns:utils="clr-namespace:DrugWars.Wpf.Utilities"
         mc:Ignorable="d"
         Title="Sell" Height="350" Width="400"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
-        Background="{DynamicResource WindowBackground}">
+        WindowStyle="None"
+        Background="#101c10"
+        AllowsTransparency="True"
+        MouseLeftButtonDown="Window_MouseLeftButtonDown">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <utils:DictionaryValueConverter x:Key="DictionaryValueConverter"/>
         <Style TargetType="TextBlock">
             <Setter Property="Foreground" Value="{DynamicResource TextForeground}"/>
             <Setter Property="FontFamily" Value="{DynamicResource FontFamily}"/>
@@ -39,61 +44,90 @@
             <Setter Property="BorderBrush" Value="Lime"/>
         </Style>
     </Window.Resources>
-    <Grid Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        
-        <ListBox x:Name="DrugListBox" Grid.Row="0" Margin="0,0,0,10"
-                 ItemsSource="{Binding GameEngine.Player.Inventory.Keys}"
-                 SelectedItem="{Binding SelectedDrug, Mode=TwoWay}"
-                 SelectionChanged="OnDrugSelectionChanged"
-                 Background="Black" Foreground="Lime" BorderBrush="Lime" FontFamily="Consolas">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="{Binding}"/>
-                        <TextBlock Grid.Column="1" Text="{Binding Path=DataContext.GameEngine.Player.Inventory[{Binding}], RelativeSource={RelativeSource AncestorType=Window}, StringFormat='Qty: {0}'}" Margin="20,0,0,0"/>
-                    </Grid>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
-        
-        <TextBox Grid.Row="1" 
-                 Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}"
-                 TextChanged="OnQuantityChanged"
-                 Margin="0,0,0,10"/>
-        
-        <TextBlock Grid.Row="2" 
-                   Text="{Binding TotalValue, StringFormat='Total Value: ${0:N0}'}"
-                   Margin="0,0,0,10"/>
-        
-        <TextBlock Grid.Row="3"
-                   Text="{Binding ErrorMessage}"
-                   Foreground="Red"
-                   Visibility="{Binding HasError, Converter={StaticResource BooleanToVisibilityConverter}}"
-                   Margin="0,0,0,10"/>
-        
-        <StackPanel Grid.Row="5" 
-                    Orientation="Horizontal" 
-                    HorizontalAlignment="Right">
-            <Button Content="Sell" 
-                    Click="OnSellClick"
-                    IsEnabled="{Binding CanSell}"
-                    Width="75" 
-                    Margin="0,0,10,0"/>
-            <Button Content="Cancel" 
-                    Click="OnCancelClick"
-                    Width="75"/>
-        </StackPanel>
-    </Grid>
+    
+    <Border BorderBrush="Lime" BorderThickness="1">
+        <Grid>
+            <!-- Title Bar -->
+            <Grid VerticalAlignment="Top" Height="30" Background="#0C1F0C">
+                <TextBlock Text="SELL DRUGS" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                <Button Content="X" Width="30" Height="30" Padding="0" Margin="0" BorderThickness="0" 
+                        Click="OnCancelClick" HorizontalAlignment="Right" Background="#3c0000">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#7F0000"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </Grid>
+            
+            <Grid Margin="10,40,10,10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <ListBox x:Name="DrugListBox" Grid.Row="0" Margin="0,0,0,10"
+                        ItemsSource="{Binding GameEngine.Player.Inventory.Keys}"
+                        SelectedItem="{Binding SelectedDrug, Mode=TwoWay}"
+                        SelectionChanged="OnDrugSelectionChanged"
+                        Background="Black" Foreground="Lime" BorderBrush="Lime" FontFamily="Consolas">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="{Binding}"/>
+                                <TextBlock Grid.Column="1" Margin="20,0,0,0">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="Qty: {0}" Converter="{StaticResource DictionaryValueConverter}">
+                                            <Binding Path="DataContext.GameEngine.Player.Inventory" RelativeSource="{RelativeSource AncestorType=Window}"/>
+                                            <Binding Path="."/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
+                            </Grid>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                
+                <TextBox Grid.Row="1" 
+                        Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}"
+                        TextChanged="OnQuantityChanged"
+                        Margin="0,0,0,10"/>
+                
+                <TextBlock Grid.Row="2" 
+                        Text="{Binding TotalValue, StringFormat='Total Value: ${0:N0}'}"
+                        Margin="0,0,0,10"/>
+                
+                <TextBlock Grid.Row="3"
+                        Text="{Binding ErrorMessage}"
+                        Foreground="Red"
+                        Visibility="{Binding HasError, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        Margin="0,0,0,10"/>
+                
+                <StackPanel Grid.Row="5" 
+                            Orientation="Horizontal" 
+                            HorizontalAlignment="Right">
+                    <Button Content="Sell" 
+                            Click="OnSellClick"
+                            IsEnabled="{Binding CanSell}"
+                            Width="75" 
+                            Margin="0,0,10,0"/>
+                    <Button Content="Cancel" 
+                            Click="OnCancelClick"
+                            Width="75"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+    </Border>
 </local:GameWindowBase> 

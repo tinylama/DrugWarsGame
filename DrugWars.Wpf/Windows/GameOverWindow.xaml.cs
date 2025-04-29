@@ -11,10 +11,12 @@ using System.IO;
 using System.Text.Json;
 using DrugWars.Core.Models;
 using DrugWars.Wpf.Models;
+using System.IO.IsolatedStorage;
+using System.Diagnostics;
 
 namespace DrugWars.Wpf.Windows
 {
-    public partial class GameOverWindow : Window, INotifyPropertyChanged
+    public partial class GameOverWindow : GameWindowBase, INotifyPropertyChanged
     {
         private readonly GameEngine _gameEngine;
         private string _playerName = "";
@@ -28,7 +30,7 @@ namespace DrugWars.Wpf.Windows
         public decimal FinalDebt => _gameEngine.Player.Debt;
         public decimal FinalInventoryValue => _finalInventoryValue;
         public decimal NetWorth => FinalCash + FinalBank + FinalInventoryValue - FinalDebt;
-        public ObservableCollection<HighScore> HighScores { get; } = new();
+        public ObservableCollection<HighScore> HighScores { get; } = [];
 
         public string PlayerName
         {
@@ -94,7 +96,6 @@ namespace DrugWars.Wpf.Windows
             var scores = HighScoreManager.Load();
             HighScores.Clear();
             
-            // Add existing high scores
             foreach (var score in scores)
             {
                 HighScores.Add(score);
@@ -150,40 +151,54 @@ namespace DrugWars.Wpf.Windows
 
     public static class HighScoreManager
     {
-        private static readonly string FilePath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), 
-            "DrugWars", 
-            "HighScores.json"
-        );
-        
-        private static List<HighScore>? _scores = null;
+        private static readonly string FileName = "HighScores.json";
+        private static List<HighScore> _scores = [];
+        private static bool _isLoaded;
 
         private static void EnsureLoaded()
         {
-            if (_scores != null) return;
+            if (_isLoaded) return;
+
             try
             {
-                if (File.Exists(FilePath))
+                using var storage = IsolatedStorageFile.GetUserStoreForAssembly();
+                if (storage.FileExists(FileName))
                 {
-                    var json = File.ReadAllText(FilePath);
-                    _scores = JsonSerializer.Deserialize<List<HighScore>>(json) ?? new List<HighScore>();
-                }
-                else
-                {
-                    _scores = new List<HighScore>();
+                    using var stream = storage.OpenFile(FileName, FileMode.Open);
+                    using var reader = new StreamReader(stream);
+                    var json = reader.ReadToEnd();
+                    _scores = JsonSerializer.Deserialize<List<HighScore>>(json) ?? [];
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                _scores = new List<HighScore>();
+                Debug.WriteLine($"Error loading high scores: {ex.Message}");
+                _scores = [];
+            }
+
+            _isLoaded = true;
+        }
+
+        private static void SaveScores()
+        {
+            try
+            {
+                using var storage = IsolatedStorageFile.GetUserStoreForAssembly();
+                using var stream = storage.CreateFile(FileName);
+                using var writer = new StreamWriter(stream);
+                var json = JsonSerializer.Serialize(_scores);
+                writer.Write(json);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error saving high scores: {ex.Message}");
             }
         }
 
         public static List<HighScore> Load()
         {
             EnsureLoaded();
-            // Ensure _scores is not null before ordering
-            var orderedScores = (_scores ?? new List<HighScore>())
+            var orderedScores = _scores
                 .OrderByDescending(s => s.Score)
                 .Take(10)
                 .ToList();
@@ -200,13 +215,12 @@ namespace DrugWars.Wpf.Windows
         public static void Add(HighScore entry)
         {
             EnsureLoaded();
-            if (_scores == null)
-            {
-                _scores = new List<HighScore>();
-            }
-            
             _scores.Add(entry);
-            _scores = _scores.OrderByDescending(s => s.Score).Take(10).ToList();
+
+            // Keep only top scores
+            _scores = [.. _scores
+                .OrderByDescending(s => s.Score)
+                .Take(10)];
 
             // Update rankings
             for (int i = 0; i < _scores.Count; i++)
@@ -214,19 +228,7 @@ namespace DrugWars.Wpf.Windows
                 _scores[i].Rank = i + 1;
             }
 
-            try
-            {
-                var dir = Path.GetDirectoryName(FilePath);
-                if (!Directory.Exists(dir) && dir != null)
-                    Directory.CreateDirectory(dir);
-                    
-                var json = JsonSerializer.Serialize(_scores);
-                File.WriteAllText(FilePath, json);
-            }
-            catch 
-            { 
-                // ignore errors 
-            }
+            SaveScores();
         }
     }
 } 

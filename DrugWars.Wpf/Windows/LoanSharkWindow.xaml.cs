@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using DrugWars.Wpf.Models;
 using DrugWars.Wpf.Utilities;
 using DrugWars.Core.Models;
+using System.Diagnostics;
 
 namespace DrugWars.Wpf.Windows
 {
@@ -113,6 +114,8 @@ namespace DrugWars.Wpf.Windows
 
         public int Cash => (int)GameEngine.Player.Cash;
         public int Debt => (int)GameEngine.Player.Debt;
+
+        public bool CanRepayAll => GameEngine.Player.Cash > 0 && GameEngine.Player.Debt > 0 && GameEngine.Player.Cash >= GameEngine.Player.Debt;
 
         public LoanSharkWindow(GameEngine gameEngine)
         {
@@ -222,6 +225,37 @@ namespace DrugWars.Wpf.Windows
             Close();
         }
 
+        private void OnRepayAllClick(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (!CanRepayAll)
+                {
+                    if (GameEngine.Player.Cash < GameEngine.Player.Debt)
+                    {
+                        ErrorMessage = "You don't have enough cash to repay all your debt";
+                    }
+                    return;
+                }
+
+                decimal amount = GameEngine.Player.Debt;
+                GameEngine.Player.Cash -= amount;
+                GameEngine.Player.Debt = 0;
+                
+                if (Owner is MainWindow mainWindow)
+                {
+                    mainWindow.SetStatusMessage($"Paid off all your debt: ${amount:N0}");
+                }
+                
+                DialogResult = true;
+                Close();
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = $"Error: {ex.Message}";
+            }
+        }
+
         private void OnCancelClick(object sender, RoutedEventArgs e)
         {
             DialogResult = false;
@@ -237,6 +271,19 @@ namespace DrugWars.Wpf.Windows
         {
             IsBorrowing = !IsBorrowing;
             ErrorMessage = string.Empty;
+        }
+
+        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                DragMove();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error in Window_MouseLeftButtonDown: {ex.Message}");
+                Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+            }
         }
 
         private void ShowHelpDialog()
