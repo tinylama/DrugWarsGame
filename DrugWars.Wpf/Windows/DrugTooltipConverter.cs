@@ -13,7 +13,7 @@ namespace DrugWars.Wpf.Windows
             if (value is Drug drug)
             {
                 var prices = drug.PriceHistory.ToList();
-                string spark = new PriceHistorySparklineConverter().Convert(prices, null, null, culture)?.ToString() ?? "";
+                string spark = new PriceHistorySparklineConverter().Convert(prices, targetType, parameter, culture)?.ToString() ?? "";
                 string tip = "";
                 if (prices.Count > 2)
                 {

@@ -156,7 +156,7 @@ namespace DrugWars.Wpf.Windows
             "HighScores.json"
         );
         
-        private static List<HighScore> _scores = null;
+        private static List<HighScore>? _scores = null;
 
         private static void EnsureLoaded()
         {
@@ -182,7 +182,11 @@ namespace DrugWars.Wpf.Windows
         public static List<HighScore> Load()
         {
             EnsureLoaded();
-            var orderedScores = _scores.OrderByDescending(s => s.Score).Take(10).ToList();
+            // Ensure _scores is not null before ordering
+            var orderedScores = (_scores ?? new List<HighScore>())
+                .OrderByDescending(s => s.Score)
+                .Take(10)
+                .ToList();
             
             // Update rankings
             for (int i = 0; i < orderedScores.Count; i++)
@@ -196,6 +200,11 @@ namespace DrugWars.Wpf.Windows
         public static void Add(HighScore entry)
         {
             EnsureLoaded();
+            if (_scores == null)
+            {
+                _scores = new List<HighScore>();
+            }
+            
             _scores.Add(entry);
             _scores = _scores.OrderByDescending(s => s.Score).Take(10).ToList();
 

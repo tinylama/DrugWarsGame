@@ -300,7 +300,7 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
             bool startNewGame = gameOverWindow.ShowDialog() == true;
             
             // Cleanup current window
-            GameEngine = null; // Trigger cleanup of event handlers
+            GameEngine = new GameEngine(); // Use empty engine instead of null
             Close();
             
             // If user wants to start a new game, do it after current window is fully closed
@@ -648,12 +648,29 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
 
     private string ShowPlayerChoiceDialog(string message, string[] options)
     {
-        // Only handle police/gun events, not travel cancel
-        var dialog = new PlayerChoiceDialog(message, options);
-        bool? result = dialog.ShowDialog();
-        if (result == true)
-            return dialog.SelectedOption;
-        // If cancelled, return null or empty string
-        return null;
+        try
+        {
+            Debug.WriteLine($"Player choice requested: {message}");
+            // Only handle police/gun events, not travel cancel
+            var dialog = new PlayerChoiceDialog(message, options);
+            bool? result = dialog.ShowDialog();
+            
+            if (result == true && !string.IsNullOrEmpty(dialog.SelectedOption))
+            {
+                Debug.WriteLine($"Player chose: {dialog.SelectedOption}");
+                return dialog.SelectedOption;
+            }
+            
+            // If cancelled or no selection, return empty string (safer than null)
+            Debug.WriteLine("Player dialog cancelled or no selection made");
+            return string.Empty;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Error in ShowPlayerChoiceDialog: {ex.Message}");
+            Debug.WriteLine($"Stack trace: {ex.StackTrace}");
+            // Return empty string on error
+            return string.Empty;
+        }
     }
 }
