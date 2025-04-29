@@ -1,0 +1,14 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Color x:Key="AccentColor">#1976D2</Color>
+    <SolidColorBrush x:Key="WindowBackground" Color="White"/>
+    <SolidColorBrush x:Key="TextForeground" Color="#222"/>
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+    <FontFamily x:Key="FontFamily">Segoe UI</FontFamily>
+    <SolidColorBrush x:Key="ButtonBackground" Color="#E3F2FD"/>
+    <SolidColorBrush x:Key="ButtonForeground" Color="#1976D2"/>
+    <SolidColorBrush x:Key="ButtonBorderBrush" Color="#1976D2"/>
+    <SolidColorBrush x:Key="TileBackground" Color="#F5F5F5"/>
+    <SolidColorBrush x:Key="TileBorderBrush" Color="#1976D2"/>
+    <SolidColorBrush x:Key="StatusBarBackground" Color="#E3F2FD"/>
+</ResourceDictionary> 
