@@ -19,10 +19,13 @@ public class DrugTests
             Name = "Test Drug",
             CurrentPrice = 100
         };
+        drug.RecordDailyPrice();
 
         // Act
         drug.CurrentPrice = 150;
+        drug.RecordDailyPrice();
         drug.CurrentPrice = 75;
+        drug.RecordDailyPrice();
 
         // Assert
         Assert.Equal(75, drug.MinPrice);
@@ -165,8 +168,8 @@ public class DrugTests
         drug.RecordDailyPrice();
 
         // Assert
-        Assert.Single(drug.PriceHistory); // Should not add duplicate
-        Assert.Equal(100, drug.PriceHistory.First());
+        Assert.Equal(2, drug.PriceHistory.Count()); // Should have two entries for two days
+        Assert.All(drug.PriceHistory, price => Assert.Equal(100, price)); // All prices should be 100
     }
 
     [Fact]
