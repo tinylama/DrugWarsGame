@@ -30,8 +30,8 @@ public partial class TravelWindow : GameWindowBase, INotifyPropertyChanged
         }
     }
 
-    public bool CanTravel => 
-        SelectedLocation != null && 
+    public bool CanTravel =>
+        SelectedLocation != null &&
         GameEngine.Player.Cash >= SelectedLocation.TravelCost;
 
     public string ErrorMessage
@@ -122,4 +122,4 @@ public partial class TravelWindow : GameWindowBase, INotifyPropertyChanged
     {
         MessageBox.Show("Drug Wars\n\nRetro remake by Mark.\n\nTravel window.\nF1: Help\nEsc: Close window\n", "About / Help", MessageBoxButton.OK, MessageBoxImage.Information);
     }
-} 
+}

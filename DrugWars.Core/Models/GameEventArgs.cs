@@ -10,4 +10,4 @@ public class GameEventArgs : EventArgs
     {
         Message = message;
     }
-} 
+}

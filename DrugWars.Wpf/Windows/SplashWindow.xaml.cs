@@ -51,4 +51,4 @@ namespace DrugWars.Wpf.Windows
             Application.Current.Shutdown();
         }
     }
-} 
+}

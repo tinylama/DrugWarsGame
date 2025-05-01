@@ -33,4 +33,4 @@ namespace DrugWars.Wpf.Windows
             }
         }
     }
-} 
+}

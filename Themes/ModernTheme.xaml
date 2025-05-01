@@ -1,0 +1,25 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Color x:Key="AccentColor">#39FF14</Color>
+    <SolidColorBrush x:Key="WindowBackground" Color="#222"/>
+    <SolidColorBrush x:Key="TextForeground" Color="#39FF14"/>
+    <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource AccentColor}"/>
+    <FontFamily x:Key="FontFamily">Segoe UI</FontFamily>
+    <SolidColorBrush x:Key="ButtonBackground" Color="#23272A"/>
+    <SolidColorBrush x:Key="ButtonForeground" Color="#39FF14"/>
+    <SolidColorBrush x:Key="ButtonBorderBrush" Color="#39FF14"/>
+    <SolidColorBrush x:Key="TileBackground" Color="#23272A"/>
+    <SolidColorBrush x:Key="TileBorderBrush" Color="#39FF14"/>
+    <SolidColorBrush x:Key="StatusBarBackground" Color="#23272A"/>
+    <SolidColorBrush x:Key="ErrorForeground" Color="#FF4444"/>
+    <SolidColorBrush x:Key="ErrorBorderBrush" Color="#FF2222"/>
+    <SolidColorBrush x:Key="CancelButtonBackground" Color="#3c0000"/>
+    <SolidColorBrush x:Key="CancelButtonBackgroundMouseOver" Color="#7F0000"/>
+    <SolidColorBrush x:Key="ListBoxBackground" Color="#23272A"/>
+    <SolidColorBrush x:Key="ListBoxForeground" Color="#39FF14"/>
+    <SolidColorBrush x:Key="ListBoxBorderBrush" Color="#39FF14"/>
+    <SolidColorBrush x:Key="ListBoxItemSelectedBackground" Color="#222C22"/>
+    <SolidColorBrush x:Key="ListBoxItemMouseOverBackground" Color="#1A2320"/>
+    <SolidColorBrush x:Key="ButtonBackgroundMouseOver" Color="#232F23"/>
+    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#101A10"/>
+</ResourceDictionary> 

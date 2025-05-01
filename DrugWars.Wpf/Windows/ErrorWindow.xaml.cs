@@ -15,4 +15,4 @@ namespace DrugWars.Wpf.Windows
             Close();
         }
     }
-} 
+}

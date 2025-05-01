@@ -1,16 +1,19 @@
-using System;
 using System.Globalization;
-using System.Windows;
 using System.Windows.Data;
 
-namespace DrugWars.Wpf.Utilities
+namespace DrugWars.Wpf.Converters
 {
-    public class StringNotEmptyToVisibilityConverter : IValueConverter
+    public class PriceChangeConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            var str = value as string;
-            return !string.IsNullOrWhiteSpace(str) ? Visibility.Visible : Visibility.Collapsed;
+            if (value is decimal change)
+            {
+                if (change == 0) return "";
+                string symbol = change > 0 ? "↑" : "↓";
+                return $"{symbol} {Math.Abs(change):C}";
+            }
+            return "";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

@@ -95,7 +95,7 @@ namespace DrugWars.Wpf.Windows
         {
             var scores = HighScoreManager.Load();
             HighScores.Clear();
-            
+
             foreach (var score in scores)
             {
                 HighScores.Add(score);
@@ -111,13 +111,13 @@ namespace DrugWars.Wpf.Windows
             if (string.IsNullOrWhiteSpace(PlayerName))
                 return;
 
-            var newScore = new HighScore 
-            { 
-                Name = PlayerName, 
+            var newScore = new HighScore
+            {
+                Name = PlayerName,
                 Score = Score,
-                Rank = HighScores.Count + 1 
+                Rank = HighScores.Count + 1
             };
-            
+
             HighScoreManager.Add(newScore);
             LoadHighScores(); // Reload to get updated rankings
             IsTopScore = false;
@@ -202,13 +202,13 @@ namespace DrugWars.Wpf.Windows
                 .OrderByDescending(s => s.Score)
                 .Take(10)
                 .ToList();
-            
+
             // Update rankings
             for (int i = 0; i < orderedScores.Count; i++)
             {
                 orderedScores[i].Rank = i + 1;
             }
-            
+
             return orderedScores;
         }
 
@@ -231,4 +231,4 @@ namespace DrugWars.Wpf.Windows
             SaveScores();
         }
     }
-} 
+}

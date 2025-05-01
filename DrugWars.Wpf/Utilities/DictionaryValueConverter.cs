@@ -25,4 +25,4 @@ namespace DrugWars.Wpf.Utilities
             throw new NotImplementedException();
         }
     }
-} 
+}

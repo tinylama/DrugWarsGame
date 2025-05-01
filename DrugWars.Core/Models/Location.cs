@@ -6,4 +6,4 @@ public class Location
     public decimal TravelCost { get; set; }
     public int CopPresence { get; set; }
     public decimal PriceMultiplier { get; set; } = 1.0m;
-} 
+}

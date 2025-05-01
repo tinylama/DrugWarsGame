@@ -257,4 +257,4 @@ namespace DrugWars.Wpf.Services
             }
         }
     }
-} 
+}

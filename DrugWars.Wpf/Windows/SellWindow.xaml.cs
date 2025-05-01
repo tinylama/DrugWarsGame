@@ -47,7 +47,7 @@ namespace DrugWars.Wpf.Windows
             }
         }
 
-        public decimal TotalValue => 
+        public decimal TotalValue =>
             SelectedDrug != null && GameEngine.Drugs.FirstOrDefault(d => d.Name == SelectedDrug) is Drug drug
                 ? drug.CurrentPrice * Quantity
                 : 0;
@@ -106,14 +106,14 @@ namespace DrugWars.Wpf.Windows
                 InitializeComponent();
                 DataContext = this;
                 IconHelper.SetWindowIcon(this);
-                
+
                 // Defer loading inventory until the GameEngine property is set
-                Loaded += (s, e) => 
+                Loaded += (s, e) =>
                 {
-                    try 
+                    try
                     {
                         LoadInventory();
-                        
+
                         // Auto-select first item if available
                         var drugListBox = this.FindName("DrugListBox") as ListBox;
                         if (drugListBox != null && drugListBox.Items.Count > 0 && SelectedDrug == null)
@@ -125,7 +125,7 @@ namespace DrugWars.Wpf.Windows
                                 Quantity = owned;
                             }
                         }
-                        
+
                         // If no inventory, show message and close
                         if (GameEngine.Player.Inventory.Count == 0)
                         {
@@ -148,7 +148,7 @@ namespace DrugWars.Wpf.Windows
                         Close();
                     }
                 };
-                
+
                 // Keyboard shortcuts
                 InputBindings.Add(new KeyBinding(new RelayCommand(_ => Close()), new KeyGesture(Key.Escape)));
                 InputBindings.Add(new KeyBinding(new RelayCommand(_ => ShowHelpDialog()), new KeyGesture(Key.F1)));
@@ -218,10 +218,10 @@ namespace DrugWars.Wpf.Windows
 
                 GameEngine.Player.Cash = GameEngine.Player.Cash + (int)TotalValue;
                 GameEngine.Player.Inventory[SelectedDrug] -= Quantity;
-                
+
                 if (GameEngine.Player.Inventory[SelectedDrug] == 0)
                     GameEngine.Player.Inventory.Remove(SelectedDrug);
-                
+
                 // Show status message in main window
                 if (Owner is MainWindow mainWindow)
                 {
@@ -288,4 +288,4 @@ namespace DrugWars.Wpf.Windows
         public required int Quantity { get; init; }
         public required int ValuePerUnit { get; init; }
     }
-} 
+}
