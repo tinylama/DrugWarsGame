@@ -91,20 +91,20 @@ namespace DrugWars.Wpf.Models
                 },
                 _ => new List<Drug>()
             };
-            
+
             // Initialize price history for all drugs
             foreach (var drug in drugs)
             {
                 drug.InitializeHistory();
-                
+
                 // Force the price history to contain the initial price
                 if (!drug.PriceHistory.Any())
                 {
                     // We need to use reflection because AddPriceToHistory is private
                     var priceHistoryMethod = drug.GetType().GetMethod(
-                        "AddPriceToHistory", 
+                        "AddPriceToHistory",
                         System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                    
+
                     if (priceHistoryMethod != null)
                     {
                         priceHistoryMethod.Invoke(drug, new object[] { drug.CurrentPrice });
@@ -112,7 +112,7 @@ namespace DrugWars.Wpf.Models
                     }
                 }
             }
-            
+
             return drugs;
         }
 
@@ -164,4 +164,4 @@ namespace DrugWars.Wpf.Models
             };
         }
     }
-} 
+}

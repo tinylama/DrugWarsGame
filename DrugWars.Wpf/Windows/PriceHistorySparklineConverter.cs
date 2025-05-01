@@ -80,4 +80,4 @@ namespace DrugWars.Wpf.Windows
             throw new NotImplementedException();
         }
     }
-} 
+}

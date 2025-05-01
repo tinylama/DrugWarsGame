@@ -77,4 +77,4 @@ public class Player : INotifyPropertyChanged
         OnPropertyChanged(nameof(Inventory));
         OnPropertyChanged(nameof(CurrentInventoryTotal));
     }
-} 
+}

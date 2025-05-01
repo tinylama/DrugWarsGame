@@ -105,11 +105,11 @@ namespace DrugWars.Wpf.Windows
                 OnPropertyChanged(nameof(AmountLabelText));
             }
         }
-        
+
         public bool IsPaying => !_isBorrowing;
-        
+
         public string ActionButtonText => IsBorrowing ? "Borrow" : "Pay Debt";
-        
+
         public string AmountLabelText => IsBorrowing ? "Amount to Borrow: $" : "Amount to Pay: $";
 
         public int Cash => (int)GameEngine.Player.Cash;
@@ -208,7 +208,7 @@ namespace DrugWars.Wpf.Windows
 
             GameEngine.Player.Cash += amount;
             GameEngine.Player.Debt += amount;
-            
+
             DialogResult = true;
             Close();
         }
@@ -220,7 +220,7 @@ namespace DrugWars.Wpf.Windows
 
             GameEngine.Player.Cash -= amount;
             GameEngine.Player.Debt -= amount;
-            
+
             DialogResult = true;
             Close();
         }
@@ -241,12 +241,12 @@ namespace DrugWars.Wpf.Windows
                 decimal amount = GameEngine.Player.Debt;
                 GameEngine.Player.Cash -= amount;
                 GameEngine.Player.Debt = 0;
-                
+
                 if (Owner is MainWindow mainWindow)
                 {
                     mainWindow.SetStatusMessage($"Paid off all your debt: ${amount:N0}");
                 }
-                
+
                 DialogResult = true;
                 Close();
             }
@@ -297,4 +297,4 @@ namespace DrugWars.Wpf.Windows
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
-} 
+}

@@ -24,4 +24,4 @@ namespace DrugWars.Wpf.Utilities
             remove { CommandManager.RequerySuggested -= value; }
         }
     }
-} 
+}

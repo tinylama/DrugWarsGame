@@ -23,4 +23,4 @@ public class GameWindowBase : Window
     {
         _gameEngine = gameEngine;
     }
-} 
+}

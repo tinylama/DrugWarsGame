@@ -53,7 +53,7 @@ public class GameEngine : INotifyPropertyChanged
         Drugs = new List<Drug>();
         Locations = new List<Location>();
         HasGun = false;
-        
+
         // Set as the current game engine
         Current = this;
     }
@@ -105,12 +105,12 @@ public class GameEngine : INotifyPropertyChanged
     {
         // Base loan amount
         decimal baseLoan = 5000;
-        
+
         // Increase loan limit based on player's net worth and reputation
         decimal netWorth = Player.Cash + Player.Bank - Player.Debt;
         decimal assetMultiplier = Math.Max(0, netWorth) / 1000;
         decimal dayMultiplier = Math.Min(2.0m, Player.Day / 15.0m);
-        
+
         return Math.Min(50000, baseLoan * (1 + assetMultiplier) * dayMultiplier);
     }
 
@@ -118,14 +118,14 @@ public class GameEngine : INotifyPropertyChanged
     {
         // Base daily interest rate (5%)
         decimal baseRate = 0.05m;
-        
+
         // Interest increases with debt-to-asset ratio
         decimal debtRatio = Player.Debt / Math.Max(1, Player.Cash + Player.Bank);
         decimal riskPremium = Math.Min(0.05m, debtRatio * 0.02m);
-        
+
         // Interest decreases slightly as game progresses (player becomes more "trustworthy")
         decimal dayDiscount = Math.Min(0.02m, Player.Day * 0.001m);
-        
+
         return Math.Max(0.03m, baseRate + riskPremium - dayDiscount);
     }
 
@@ -135,7 +135,7 @@ public class GameEngine : INotifyPropertyChanged
         {
             decimal rate = GetCurrentInterestRate();
             Player.Debt = (int)Math.Ceiling(Player.Debt * (1 + rate));
-            
+
             // Notify player of significant interest charges
             if (rate > 0.07m)
             {
@@ -162,7 +162,7 @@ public class GameEngine : INotifyPropertyChanged
             GameOver?.Invoke(this, EventArgs.Empty);
             return;
         }
-        
+
         // Check for excessive debt
         bool hasExcessiveDebt = Player.Debt > 100000 || (Player.Debt > 50000 && Player.Debt > (Player.Cash + Player.Bank) * 5);
         if (hasExcessiveDebt)
@@ -176,7 +176,7 @@ public class GameEngine : INotifyPropertyChanged
     public void AdvanceDayOrTravel()
     {
         Player.Day++;
-        
+
         // Check game over conditions first
         if (Player.Day >= MAX_DAYS)
         {
@@ -184,17 +184,17 @@ public class GameEngine : INotifyPropertyChanged
             GameOver?.Invoke(this, EventArgs.Empty);
             return;
         }
-        
+
         // Apply interest before other events
         ApplyDailyInterest();
-        
+
         // Loan shark events
         if (Player.Debt > 0)
         {
             // Chance of loan shark visit increases with debt ratio
             decimal debtRatio = Player.Debt / Math.Max(1, Player.Cash + Player.Bank);
             double visitChance = Math.Min(0.15, 0.05 + (double)debtRatio * 0.1);
-            
+
             if (random.NextDouble() < visitChance)
             {
                 // Different types of loan shark encounters
@@ -540,18 +540,18 @@ public class GameEngine : INotifyPropertyChanged
     private void CheckPlayerStuck()
     {
         Player.CleanupInventory();
-        
+
         // Find minimum travel cost to any location
         decimal minTravelCost = Locations
             .Where(loc => loc != Locations[Player.CurrentLocation])
             .Min(loc => loc.TravelCost);
-            
+
         // Find minimum drug price
         decimal minDrugPrice = Drugs.Min(d => d.CurrentPrice);
-        
+
         // Calculate minimum cash needed to do anything useful
         decimal minUsefulCash = Math.Min(minTravelCost, minDrugPrice);
-        
+
         bool hasUsableCash = Player.Cash >= minUsefulCash;
         bool hasInventory = Player.Inventory.Count > 0;
         bool canTravel = Locations.Any(loc => loc != Locations[Player.CurrentLocation] && Player.Cash >= loc.TravelCost);
@@ -596,4 +596,4 @@ public class GameEngine : INotifyPropertyChanged
             }
         }
     }
-} 
+}

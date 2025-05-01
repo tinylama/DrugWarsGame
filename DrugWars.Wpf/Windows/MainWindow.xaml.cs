@@ -61,22 +61,22 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
             }
 
             base.GameEngine = value;
-            
+
             // Set the static Current property for converters to access
             GameEngine.Current = value;
-            
+
             // Listen to events on the new GameEngine
             WireGameEngineEvents();
-            
+
             // Update UI
             Update();
-            
+
             OnPropertyChanged(nameof(GameEngine));
             OnPropertyChanged(nameof(Player));
             OnPropertyChanged(nameof(Drugs));
             OnPropertyChanged(nameof(IsBankAvailable));
             OnPropertyChanged(nameof(IsLoanSharkAvailable));
-            
+
             Debug.WriteLine($"GameEngine set complete. Player: {Player}");
         }
     }
@@ -196,7 +196,7 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
     protected override void OnClosed(EventArgs e)
     {
         Debug.WriteLine("OnClosed called");
-        
+
         // Cleanup event handlers
         if (GameEngine != null)
         {
@@ -253,10 +253,10 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
             OnPropertyChanged(nameof(IsBankAvailable));
             OnPropertyChanged(nameof(IsLoanSharkAvailable));
             OnPropertyChanged(nameof(TrenchcoatCapacity));
-            
+
             // Extra safety check for game over conditions
             GameEngine.CheckGameOverConditions();
-            
+
             Logger.Log("Player stats updated successfully");
         }
         catch (Exception ex)
@@ -285,15 +285,15 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
         try
         {
             Debug.WriteLine("Game over event triggered");
-            
+
             // Create and show game over window
             var gameOverWindow = new GameOverWindow(GameEngine) { Owner = this };
             bool startNewGame = gameOverWindow.ShowDialog() == true;
-            
+
             // Cleanup current window
             GameEngine = new GameEngine(); // Use empty engine instead of null
             Close();
-            
+
             // If user wants to start a new game, do it after current window is fully closed
             if (startNewGame)
             {
@@ -301,12 +301,12 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
                 {
                     try
                     {
-                var mainMenu = new MainWindow(new GameEngine());
-                mainMenu.Show();
-            }
+                        var mainMenu = new MainWindow(new GameEngine());
+                        mainMenu.Show();
+                    }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"Failed to start new game: {ex.Message}", "Error", 
+                        MessageBox.Show($"Failed to start new game: {ex.Message}", "Error",
                             MessageBoxButton.OK, MessageBoxImage.Error);
                     }
                 }));
@@ -316,7 +316,7 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
         {
             Debug.WriteLine($"Error in OnGameOver: {ex.Message}");
             Debug.WriteLine($"Stack trace: {ex.StackTrace}");
-            MessageBox.Show($"An error occurred while handling game over: {ex.Message}", 
+            MessageBox.Show($"An error occurred while handling game over: {ex.Message}",
                 "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
@@ -368,15 +368,15 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
                 StatusMessage = "You do not have enough money to buy drugs.";
                 return;
             }
-            
-            try 
+
+            try
             {
                 var buyWindow = new BuyWindow();
                 buyWindow.GameEngine = this.GameEngine; // Set GameEngine after creation
                 buyWindow.Owner = this;
-            buyWindow.ShowDialog();
-            UpdatePlayerStats();
-            UpdateInventoryList();
+                buyWindow.ShowDialog();
+                UpdatePlayerStats();
+                UpdateInventoryList();
             }
             catch (Exception ex)
             {
@@ -405,15 +405,15 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
                 StatusMessage = "You do not have any drugs to sell.";
                 return;
             }
-            
-            try 
+
+            try
             {
                 var sellWindow = new SellWindow();
                 sellWindow.GameEngine = this.GameEngine; // Set GameEngine after creation
                 sellWindow.Owner = this;
-            sellWindow.ShowDialog();
-            UpdatePlayerStats();
-            UpdateInventoryList();
+                sellWindow.ShowDialog();
+                UpdatePlayerStats();
+                UpdateInventoryList();
             }
             catch (Exception ex)
             {
@@ -447,7 +447,7 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
                 OnPropertyChanged(nameof(Drugs));
                 OnPropertyChanged(nameof(IsBankAvailable));
                 OnPropertyChanged(nameof(IsLoanSharkAvailable));
-                
+
                 // Extra check for day limit after travel
                 GameEngine.CheckGameOverConditions();
             }
@@ -521,7 +521,7 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
                              "Buy low, sell high! Travel between locations to find the best prices.\n" +
                              "Watch out for cops and loan sharks!\n\n" +
                              "Game ends after 30 days or when you're broke.";
-            
+
             MessageBox.Show(helpText, "Help", MessageBoxButton.OK, MessageBoxImage.Information);
             Logger.Log("Help message displayed");
         }
@@ -556,7 +556,7 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
             sb.AppendLine($"Expansion: {GameEngine.Expansion}");
             sb.AppendLine($"Day: {GameEngine.Player.Day}/30");
             sb.AppendLine();
-            
+
             sb.AppendLine("===== PLAYER =====");
             sb.AppendLine($"Cash: ${GameEngine.Player.Cash}");
             sb.AppendLine($"Bank: ${GameEngine.Player.Bank}");
@@ -565,7 +565,7 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
             sb.AppendLine($"Location: {GameEngine.Locations[GameEngine.Player.CurrentLocation].Name}");
             sb.AppendLine($"Inventory: {GameEngine.Player.CurrentInventoryTotal}/{GameEngine.Player.MaxInventory}");
             sb.AppendLine();
-            
+
             sb.AppendLine("===== INVENTORY =====");
             if (GameEngine.Player.Inventory.Count == 0)
             {
@@ -579,7 +579,7 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
                 }
             }
             sb.AppendLine();
-            
+
             sb.AppendLine("===== DRUGS AT CURRENT LOCATION =====");
             foreach (var drug in GameEngine.Drugs)
             {
@@ -587,7 +587,7 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
             }
 
             sb.AppendLine();
-            
+
             sb.AppendLine("===== AVAILABLE LOCATIONS =====");
             for (int i = 0; i < GameEngine.Locations.Count; i++)
             {
@@ -621,7 +621,7 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
     {
         WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
     }
-    
+
     private void OnSettingsClick(object sender, RoutedEventArgs e)
     {
         try
@@ -682,16 +682,16 @@ public partial class MainWindow : GameWindowBase, INotifyPropertyChanged
         try
         {
             Debug.WriteLine($"Player choice requested: {message}");
-        // Only handle police/gun events, not travel cancel
-        var dialog = new PlayerChoiceDialog(message, options);
-        bool? result = dialog.ShowDialog();
-            
+            // Only handle police/gun events, not travel cancel
+            var dialog = new PlayerChoiceDialog(message, options);
+            bool? result = dialog.ShowDialog();
+
             if (result == true && !string.IsNullOrEmpty(dialog.SelectedOption))
             {
                 Debug.WriteLine($"Player chose: {dialog.SelectedOption}");
-            return dialog.SelectedOption;
+                return dialog.SelectedOption;
             }
-            
+
             // If cancelled or no selection, return empty string (safer than null)
             Debug.WriteLine("Player dialog cancelled or no selection made");
             return string.Empty;

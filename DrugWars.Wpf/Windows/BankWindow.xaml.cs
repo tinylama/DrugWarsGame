@@ -29,12 +29,12 @@ public partial class BankWindow : GameWindowBase, INotifyPropertyChanged
         }
     }
 
-    public bool CanDeposit => 
-        Amount > 0 && 
+    public bool CanDeposit =>
+        Amount > 0 &&
         Amount <= GameEngine.Player.Cash;
 
-    public bool CanWithdraw => 
-        Amount > 0 && 
+    public bool CanWithdraw =>
+        Amount > 0 &&
         Amount <= GameEngine.Player.Bank;
 
     public string ErrorMessage
@@ -145,4 +145,4 @@ public partial class BankWindow : GameWindowBase, INotifyPropertyChanged
     {
         MessageBox.Show("Drug Wars\n\nRetro remake by Mark.\n\nBank window.\nF1: Help\nEsc: Close window\n", "About / Help", MessageBoxButton.OK, MessageBoxImage.Information);
     }
-} 
+}

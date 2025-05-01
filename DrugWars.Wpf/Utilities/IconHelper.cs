@@ -45,4 +45,4 @@ namespace DrugWars.Wpf.Utilities
             }
         }
     }
-} 
+}

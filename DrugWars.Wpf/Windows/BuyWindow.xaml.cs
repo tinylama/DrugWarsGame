@@ -27,7 +27,7 @@ namespace DrugWars.Wpf.Windows
         {
             InitializeComponent();
             DataContext = this;
-            
+
             // Set appropriate initial quantity and auto-select drug
             Loaded += (s, e) =>
             {
@@ -38,7 +38,7 @@ namespace DrugWars.Wpf.Windows
                     if (listBox != null && listBox.Items.Count > 0)
                     {
                         listBox.SelectedIndex = 0;
-                        
+
                         // Set a reasonable default quantity (half of maximum possible)
                         if (SelectedDrug != null && MaxBuyQuantity > 0)
                         {
@@ -61,7 +61,7 @@ namespace DrugWars.Wpf.Windows
                     Close();
                 }
             };
-            
+
             // Keyboard shortcuts
             InputBindings.Add(new KeyBinding(new RelayCommand(_ => Close()), new KeyGesture(Key.Escape)));
             InputBindings.Add(new KeyBinding(new RelayCommand(_ => ShowHelpDialog()), new KeyGesture(Key.F1)));
@@ -247,4 +247,4 @@ namespace DrugWars.Wpf.Windows
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
-} 
+}

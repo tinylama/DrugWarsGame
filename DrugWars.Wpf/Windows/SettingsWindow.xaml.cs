@@ -702,4 +702,4 @@ namespace DrugWars.Wpf.Windows
             OnPropertyChanged(nameof(IsMusicAvailable));
         }
     }
-} 
+}

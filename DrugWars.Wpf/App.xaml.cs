@@ -21,8 +21,8 @@ namespace DrugWars.Wpf;
 public partial class App : Application
 {
     private static readonly string _logFilePath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), 
-        "DrugWars", 
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+        "DrugWars",
         "error_log.txt");
 
     private readonly TextWriterTraceListener? _traceListener;
@@ -63,7 +63,7 @@ public partial class App : Application
         try
         {
             // Append to log file
-            File.AppendAllText(_logFilePath, 
+            File.AppendAllText(_logFilePath,
                 $"[{DateTime.Now}] {errorMessage}{Environment.NewLine}{Environment.NewLine}");
         }
         catch (Exception ex)
@@ -147,13 +147,16 @@ public partial class App : Application
         ApplyTheme(savedTheme);
         Debug.WriteLine("Startup: Theme applied");
         // Start music automatically at a quiet volume
-        try {
+        try
+        {
             double vol = DrugWars.Wpf.Properties.Settings.Default.MusicVolume;
             if (vol <= 0) vol = 5;
             AudioManager.Instance.SetMusicVolume(vol);
             string musicFolder = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "background_music");
             AudioManager.Instance.PlayMusic(musicFolder);
-        } catch (Exception ex) {
+        }
+        catch (Exception ex)
+        {
             Debug.WriteLine($"Error starting music on startup: {ex.Message}");
         }
         Debug.WriteLine("=== Application Starting ===");
@@ -179,7 +182,8 @@ public partial class App : Application
                 Debug.WriteLine("Startup: LoanSharkIntroWindow closed");
                 Logger.Log($"Selected expansion: {selectedExpansion}");
                 Debug.WriteLine($"Startup: Selected expansion: {selectedExpansion}");
-                try {
+                try
+                {
                     Debug.WriteLine("Startup: Creating GameEngine");
                     var gameEngine = new GameEngine(selectedExpansion)
                     {
@@ -192,19 +196,20 @@ public partial class App : Application
                     gameEngine.Player.Debt = 5000;
                     Logger.Log("GameEngine initialized successfully");
                     Debug.WriteLine("Startup: GameEngine initialized successfully");
-                    gameEngine.GameEventOccurred += (s, args) => 
+                    gameEngine.GameEventOccurred += (s, args) =>
                     {
                         if (args is GameEventArgs gameArgs)
                         {
                             Logger.Log($"Game event: {gameArgs.Message}");
                             Debug.WriteLine($"Game event: {gameArgs.Message}");
-                            
+
                             // Additional check for day 30
                             if (gameEngine.Player.Day >= 30)
                             {
                                 Logger.Log("Day 30 reached - enforcing game over");
                                 // Show game over message
-                                Application.Current.Dispatcher.Invoke(() => {
+                                Application.Current.Dispatcher.Invoke(() =>
+                                {
                                     MessageBox.Show("You've reached day 30. Time to retire!", "Game Over", MessageBoxButton.OK, MessageBoxImage.Information);
                                     // Handle automatic shutdown and cleanup
                                     Shutdown();
@@ -212,7 +217,7 @@ public partial class App : Application
                             }
                         }
                     };
-                    gameEngine.GameOver += (s, args) => 
+                    gameEngine.GameOver += (s, args) =>
                     {
                         if (args is GameEventArgs gameArgs)
                         {
@@ -239,11 +244,12 @@ public partial class App : Application
                         splashWindow.Show();
                     };
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     Logger.LogError("GameEngine initialization", ex);
                     Debug.WriteLine($"Startup: Error initializing GameEngine: {ex.Message}");
                     Debug.WriteLine($"Startup: Stack Trace: {ex.StackTrace}");
-                    MessageBox.Show($"An error occurred initializing the game: {ex.Message}", 
+                    MessageBox.Show($"An error occurred initializing the game: {ex.Message}",
                         "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     Shutdown(-1);
                 }
@@ -260,7 +266,7 @@ public partial class App : Application
         {
             Debug.WriteLine($"Startup: Critical error during startup: {ex.Message}");
             Debug.WriteLine($"Startup: Stack Trace: {ex.StackTrace}");
-            MessageBox.Show($"An error occurred during startup: {ex.Message}", 
+            MessageBox.Show($"An error occurred during startup: {ex.Message}",
                 "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             Shutdown(-1);
         }

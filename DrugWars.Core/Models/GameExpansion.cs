@@ -6,4 +6,4 @@ public enum GameExpansion
     Australia,
     UK,
     Medellin
-} 
+}

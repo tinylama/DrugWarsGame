@@ -12,7 +12,7 @@ namespace DrugWars.Wpf.Windows
         {
             // Basic currency formatting with $ sign and thousand separators
             string formattedValue = "";
-            
+
             if (value is decimal dec)
             {
                 formattedValue = "$" + dec.ToString("N0");
@@ -25,7 +25,7 @@ namespace DrugWars.Wpf.Windows
             {
                 formattedValue = value?.ToString() ?? string.Empty;
             }
-            
+
             return formattedValue;
         }
 
@@ -34,4 +34,4 @@ namespace DrugWars.Wpf.Windows
             throw new NotImplementedException();
         }
     }
-} 
+}

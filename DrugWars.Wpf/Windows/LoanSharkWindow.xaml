@@ -47,7 +47,7 @@
         <Grid>
             <!-- Title Bar -->
             <Grid VerticalAlignment="Top" Height="30" Background="#0C1F0C">
-                <TextBlock Text="LOAN SHARK" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                <TextBlock Text="LOAN SHARK" FontWeight="Bold" FontSize="16" VerticalAlignment="Center" Margin="10,0,0,0" Foreground="Lime"/>
                 <Button Content="X" Width="30" Height="30" Padding="0" Margin="0" BorderThickness="0" 
                         Click="OnCancelClick" HorizontalAlignment="Right" Background="#3c0000">
                     <Button.Style>

@@ -68,7 +68,7 @@ namespace DrugWars.Wpf.Windows
                 tooltip.AppendLine("Recent Prices:");
                 var recentPrices = drug.PriceHistory.TakeLast(5).ToList();
                 Debug.WriteLine($"[TOOLTIP] Adding {recentPrices.Count} recent prices");
-                
+
                 for (int i = 0; i < recentPrices.Count; i++)
                 {
                     int dayOffset = priceHistoryCount - recentPrices.Count + i + 1;
@@ -115,4 +115,4 @@ namespace DrugWars.Wpf.Windows
             throw new NotImplementedException();
         }
     }
-} 
+}
